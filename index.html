@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chatora — Conversations that think</title>
+<link rel="icon" type="image/png" href="chatora-logo.png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04070a;
+    --teal: #0F766E;
+    --emerald: #10B981;
+    --cyan: #22D3EE;
+    --text: #e6edf3;
+    --muted: #7b8894;
+  }
+
+  * { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+  h1,h2,h3,h4,h5,.brand { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.025em; font-weight: 600; }
+  body { background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+  /* ---------- BG: aurora + grid ---------- */
+  .bg-stage { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+  .bg-stage::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(34,211,238,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 100%);
+  }
+  .mesh {
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(15,118,110,0.32), transparent 38%),
+      radial-gradient(circle at 80% 20%, rgba(16,185,129,0.22), transparent 38%),
+      radial-gradient(circle at 50% 90%, rgba(34,211,238,0.18), transparent 42%);
+    filter: blur(70px);
+    animation: meshDrift 28s ease-in-out infinite alternate;
+  }
+  @keyframes meshDrift {
+    0% { transform: translate(0,0) rotate(0deg) scale(1); }
+    100% { transform: translate(-30px, 25px) rotate(6deg) scale(1.06); }
+  }
+
+  /* ---------- Scroll progress ---------- */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--emerald), var(--cyan));
+    z-index: 100; width: 0%; box-shadow: 0 0 10px var(--cyan);
+  }
+
+  /* ---------- Cursor glow ---------- */
+  .cursor-glow {
+    position: fixed; width: 420px; height: 420px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,211,238,0.08), transparent 62%);
+    pointer-events: none; z-index: 1; transform: translate(-50%,-50%);
+  }
+
+  /* ---------- Nav ---------- */
+  .nav-wrap {
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    background: rgba(4,7,10,0.5);
+    border-bottom: 1px solid rgba(34,211,238,0.06);
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .nav-wrap.scrolled {
+    background: rgba(4,7,10,0.85);
+    border-bottom-color: rgba(34,211,238,0.14);
+  }
+  .nav-link { position: relative; transition: color 0.3s; }
+  .nav-link::after {
+    content: ''; position: absolute; left: 0; bottom: -5px;
+    width: 0; height: 1px; background: var(--cyan);
+    transition: width 0.4s cubic-bezier(.2,.8,.2,1);
+  }
+  .nav-link:hover { color: var(--cyan); }
+  .nav-link:hover::after { width: 100%; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    position: relative; overflow: hidden; border-radius: 10px;
+    font-weight: 500; font-size: 13.5px; padding: 10px 20px;
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s;
+    isolation: isolate; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #0F766E 0%, #10B981 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px -10px rgba(16,185,129,0.65), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, #10B981, #22D3EE);
+    opacity: 0; transition: opacity 0.4s; z-index: -1;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -12px rgba(16,185,129,0.9); }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-ghost {
+    background: rgba(34,211,238,0.04);
+    border: 1px solid rgba(34,211,238,0.22);
+    color: #7dd3fc;
+  }
+  .btn-ghost:hover {
+    background: rgba(34,211,238,0.09);
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+  }
+
+  /* ---------- Reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s cubic-bezier(.2,.8,.2,1), transform 0.9s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---------- Typewriter ---------- */
+  .type-cursor {
+    display: inline-block; width: 3px; height: 1em;
+    background: var(--cyan); margin-left: 4px; vertical-align: -0.08em;
+    animation: blink 1s step-end infinite;
+    box-shadow: 0 0 12px var(--cyan);
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ---------- Micro glass cards (hero right) ---------- */
+  .micro {
+    background: linear-gradient(155deg, rgba(15,118,110,0.14), rgba(8,14,20,0.7));
+    border: 1px solid rgba(34,211,238,0.14);
+    border-radius: 16px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 20px 40px -28px rgba(0,0,0,0.9);
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1), border-color 0.4s;
+  }
+  .micro:hover { border-color: rgba(34,211,238,0.3); }
+
+  .float-1 { animation: float1 6s ease-in-out infinite; }
+  .float-2 { animation: float2 7s ease-in-out infinite; }
+  .float-3 { animation: float3 8s ease-in-out infinite; }
+  @keyframes float1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes float3 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* ---------- Feature card (sharper) ---------- */
+  .feat {
+    background: linear-gradient(160deg, rgba(15,118,110,0.08) 0%, rgba(8,14,20,0.65) 60%);
+    border: 1px solid rgba(34,211,238,0.1);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative; overflow: hidden;
+    transition: transform 0.45s cubic-bezier(.2,.8,.2,1), border-color 0.4s, box-shadow 0.45s;
+  }
+  .feat::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(34,211,238,0.1), transparent 40%);
+    opacity: 0; transition: opacity 0.4s; pointer-events: none;
+  }
+  .feat:hover::before { opacity: 1; }
+  .feat:hover {
+    transform: translateY(-4px);
+    border-color: rgba(34,211,238,0.28);
+    box-shadow: 0 20px 44px -26px rgba(34,211,238,0.35);
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq-item { border-bottom: 1px solid rgba(34,211,238,0.08); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 4px; cursor: pointer; font-weight: 500; font-size: 15px;
+    transition: color 0.3s;
+  }
+  .faq-q:hover { color: var(--cyan); }
+  .faq-icon {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(34,211,238,0.08);
+    border: 1px solid rgba(34,211,238,0.22);
+    transition: transform 0.4s cubic-bezier(.2,.8,.2,1), background 0.3s;
+    color: #67e8f9; font-size: 14px; line-height: 1;
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); background: rgba(34,211,238,0.2); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(.2,.8,.2,1), padding 0.4s;
+    padding: 0 4px; color: var(--muted); font-size: 14px; line-height: 1.7;
+  }
+  .faq-item.open .faq-a { max-height: 400px; padding: 0 4px 20px; }
+
+  /* ---------- Section heading ---------- */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #67e8f9; font-weight: 500;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(34,211,238,0.06);
+    border: 1px solid rgba(34,211,238,0.2);
+  }
+  .eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981; }
+
+  /* ---------- Gradient text ---------- */
+  .grad {
+    background: linear-gradient(120deg, #ffffff 0%, #67e8f9 45%, #10B981 80%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: gradShift 7s ease infinite;
+  }
+  @keyframes gradShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+  /* ---------- Wave bars (voice) ---------- */
+  .wave { display: flex; align-items: center; gap: 3px; height: 24px; }
+  .wave span {
+    width: 3px; border-radius: 2px;
+    background: linear-gradient(180deg, #22D3EE, #10B981);
+    animation: waveBar 1.2s ease-in-out infinite;
+  }
+  @keyframes waveBar { 0%,100% { height: 30%; opacity: 0.6; } 50% { height: 100%; opacity: 1; } }
+  .wave span:nth-child(1) { animation-delay: 0s; }
+  .wave span:nth-child(2) { animation-delay: .1s; }
+  .wave span:nth-child(3) { animation-delay: .2s; }
+  .wave span:nth-child(4) { animation-delay: .3s; }
+  .wave span:nth-child(5) { animation-delay: .4s; }
+  .wave span:nth-child(6) { animation-delay: .5s; }
+  .wave span:nth-child(7) { animation-delay: .6s; }
+  .wave span:nth-child(8) { animation-delay: .7s; }
+
+  /* ---------- Footer ---------- */
+  .flink { color: var(--muted); font-size: 13.5px; transition: color 0.3s, transform 0.3s; display: inline-block; }
+  .flink:hover { color: var(--cyan); transform: translateX(3px); }
+
+  /* ---------- Scrollbar ---------- */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #04070a; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(#0F766E, #10B981); border-radius: 4px; }
+
+  /* ---------- Divider glow ---------- */
+  .divider {
+    height: 1px; width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(34,211,238,0.25), transparent);
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="bg-stage"><div class="mesh"></div></div>
+
+<!-- ============ NAV ============ -->
+<nav id="nav" class="fixed top-0 left-0 right-0 z-50 nav-wrap">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2.5 group">
+      <img src="chatora-logo.png" alt="Chatora" class="w-8 h-8 object-contain transition-transform group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-500 items-center justify-center font-bold text-white text-[13px]">C</div>
+      <span class="brand text-[15px] font-bold text-white">Chatora</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8 text-[13px] font-medium text-gray-400">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#ai" class="nav-link">AI</a>
+      <a href="#voice" class="nav-link">Voice</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="login.html" class="btn btn-ghost">Login</a>
+      <a href="signup.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="pt-28 pb-20 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-14 items-center">
+
+    <div class="reveal">
+      <div class="eyebrow mb-6"><span class="eyebrow-dot"></span>Introducing Chatora</div>
+
+      <h1 class="text-[38px] sm:text-[52px] lg:text-[58px] leading-[1.06] font-bold mb-6">
+        Intelligent<br/>conversations,<br/>
+        <span class="grad" id="typeTarget">in real time</span><span class="type-cursor"></span>
+      </h1>
+
+      <p class="text-gray-400 text-[15.5px] leading-relaxed max-w-lg mb-8">
+        Chatora blends instant messaging with AI that summarizes, translates, and understands your conversations — plus crystal-clear voice notes. Fast, sharp, and built for the way you actually talk.
+      </p>
+
+      <div class="flex flex-wrap gap-3 mb-10">
+        <a href="signup.html" class="btn btn-primary">Start free
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="login.html" class="btn btn-ghost">Sign in</a>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6 max-w-md">
+        <div><div class="text-2xl font-bold text-white stat" data-count="99">0</div><div class="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">% Reliable</div></div>
+        <div><div class="text-2xl font-bold text-white stat" data-count="256">0</div><div class="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">Bit Secure</div></div>
+        <div><div class="text-2xl font-bold text-white stat" data-count="60">0</div><div class="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">FPS Smooth</div></div>
+      </div>
+    </div>
+
+    <!-- Right: floating micro cards -->
+    <div class="reveal relative h-[440px] hidden lg:block">
+      <!-- Card 1: Chat snippet -->
+      <div class="micro float-1 absolute top-0 left-0 w-[290px] p-4">
+        <div class="flex items-center gap-2.5 mb-3 pb-3 border-b border-cyan-500/10">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500"></div>
+          <div>
+            <div class="text-[13px] font-medium text-white">Ada Nwosu</div>
+            <div class="text-[10px] text-emerald-400 flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-emerald-400"></span>online</div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <div class="text-[12px] bg-white/[0.04] border border-cyan-500/10 rounded-xl rounded-bl-sm px-3 py-2 max-w-[85%] text-gray-300">Are you joining the call? 🎧</div>
+          <div class="text-[12px] bg-gradient-to-br from-teal-700 to-emerald-600 text-white rounded-xl rounded-br-sm px-3 py-2 max-w-[75%] ml-auto">Give me 2 mins</div>
+        </div>
+      </div>
+
+      <!-- Card 2: AI summary -->
+      <div class="micro float-2 absolute top-[140px] right-0 w-[280px] p-4" style="animation-delay:-2s">
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center text-[13px]">✨</div>
+          <div>
+            <div class="text-[12px] font-semibold text-white">AI Summary</div>
+            <div class="text-[10px] text-gray-500">from 47 messages</div>
+          </div>
+        </div>
+        <div class="space-y-1.5 text-[11.5px] text-gray-400 leading-relaxed">
+          <div class="flex gap-2"><span class="text-cyan-400">•</span>Study session set for Saturday 4PM</div>
+          <div class="flex gap-2"><span class="text-cyan-400">•</span>Notes PDF shared by Ada</div>
+          <div class="flex gap-2"><span class="text-cyan-400">•</span>Next: Tunde books the room</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Voice message -->
+      <div class="micro float-3 absolute bottom-0 left-8 w-[250px] p-4" style="animation-delay:-4s">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="wave flex-1">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="text-[11px] text-gray-500">0:14</div>
+        </div>
+        <div class="text-[11px] text-gray-500 mt-2.5">Voice message · Ada</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="max-w-6xl mx-auto px-5 sm:px-8"><div class="divider"></div></div>
+
+<!-- ============ FEATURES ============ -->
+<section id="features" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="max-w-2xl mb-14 reveal">
+      <div class="eyebrow mb-4"><span class="eyebrow-dot"></span>Core features</div>
+      <h2 class="text-[32px] sm:text-[42px] font-bold leading-tight mb-4">Everything you need, <span class="grad">nothing you don't.</span></h2>
+      <p class="text-gray-400 text-[15px] leading-relaxed">Sharp features engineered for speed, clarity, and everyday conversations.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="feat reveal md:col-span-2">
+        <div class="text-2xl mb-3">💬</div>
+        <h3 class="text-[17px] font-semibold mb-2">Real-Time Messaging</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Messages appear the instant they're sent — no refresh, no delay. Just seamless, live conversation with everyone you talk to.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">👥</div>
+        <h3 class="text-[17px] font-semibold mb-2">Group Chats</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Study groups, teams, family — create and manage with full admin control.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">🎙️</div>
+        <h3 class="text-[17px] font-semibold mb-2">Voice Messages</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Hold to record, release to send. Crystal-clear voice notes in seconds.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">📎</div>
+        <h3 class="text-[17px] font-semibold mb-2">Media Sharing</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Images, videos, documents — shared instantly, stored securely.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">✓✓</div>
+        <h3 class="text-[17px] font-semibold mb-2">Read Receipts</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Know exactly when your message is sent, delivered, and read.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AI ============ -->
+<section id="ai" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="max-w-2xl mb-14 reveal">
+      <div class="eyebrow mb-4"><span class="eyebrow-dot"></span>AI Integration</div>
+      <h2 class="text-[32px] sm:text-[42px] font-bold leading-tight mb-4">AI woven into <span class="grad">every conversation.</span></h2>
+      <p class="text-gray-400 text-[15px] leading-relaxed">Not a bolt-on. Intelligence sits at the core of Chatora.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">✨</div>
+        <h3 class="text-[17px] font-semibold mb-2">Chat Summarizer</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Missed 200 messages? Get a clean summary of what matters in one tap.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">🌍</div>
+        <h3 class="text-[17px] font-semibold mb-2">Real-Time Translation</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Chat across languages — English, Pidgin, Yoruba, Hausa, Igbo, and more.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="text-2xl mb-3">⚡</div>
+        <h3 class="text-[17px] font-semibold mb-2">Smart Replies</h3>
+        <p class="text-gray-400 text-[13.5px] leading-relaxed">Context-aware suggestions so you always know what to say next.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VOICE ============ -->
+<section id="voice" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
+    <div class="reveal">
+      <div class="eyebrow mb-5"><span class="eyebrow-dot"></span>Voice</div>
+      <h2 class="text-[32px] sm:text-[42px] font-bold leading-tight mb-5">Speak instead of <span class="grad">typing.</span></h2>
+      <p class="text-gray-400 text-[15px] leading-relaxed mb-7 max-w-lg">Sometimes your voice says it better. Hold the mic and send a voice note instantly — perfect for long thoughts, quick reactions, or just being yourself.</p>
+      <ul class="space-y-3 text-gray-300 text-[14px]">
+        <li class="flex items-center gap-3"><span class="w-1 h-1 rounded-full bg-emerald-400"></span>Hold to record · release to send</li>
+        <li class="flex items-center gap-3"><span class="w-1 h-1 rounded-full bg-emerald-400"></span>Works on any device with a microphone</li>
+        <li class="flex items-center gap-3"><span class="w-1 h-1 rounded-full bg-emerald-400"></span>Inline waveform playback</li>
+      </ul>
+    </div>
+
+    <div class="reveal">
+      <div class="micro p-6 max-w-sm mx-auto">
+        <div class="flex items-center gap-3 mb-4 pb-4 border-b border-cyan-500/10">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="wave flex-1">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[11.5px] text-gray-500">
+          <span>Recording · Ada</span><span>0:23</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="py-24 px-5 sm:px-8">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12 reveal">
+      <div class="eyebrow mb-4 inline-flex"><span class="eyebrow-dot"></span>FAQ</div>
+      <h2 class="text-[32px] sm:text-[42px] font-bold leading-tight mb-4">Questions, <span class="grad">answered.</span></h2>
+      <p class="text-gray-400 text-[15px]">Everything you need to know about Chatora.</p>
+    </div>
+
+    <div class="micro px-6 sm:px-8 py-2 reveal">
+      <div class="faq-item">
+        <div class="faq-q">Is Chatora free to use?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes — completely free for personal use. Create an account, chat with friends, send voice notes, and use the AI features without paying.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is Chatora different from other chat apps?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Chatora adds an AI layer on top of standard messaging — summarization, real-time translation, and smart reply suggestions built directly into every conversation.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is my data safe?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Your messages and media are secured with modern authentication and access rules. Only you and the people you chat with can see your conversations.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I send voice messages?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Hold the microphone button in any chat to record. Release to send. Your voice note is delivered instantly and plays inline.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What languages does the AI translate?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Major world languages plus Nigerian languages including Pidgin, Yoruba, Hausa, and Igbo. More being added regularly.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need to download an app?<span class="faq-icon">+</span></div>
+        <div class="faq-a">No download. Chatora runs in your browser on phone, tablet, or desktop. Just open and sign in.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I create group chats?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes — unlimited groups for friends, family, study, or teams. Add or remove members anytime. Admins have full control.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Will it work on slow internet?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Chatora is built to be lightweight with graceful reconnection, so you stay connected even on unstable networks.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I delete my account?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Delete from Settings at any time. All your data is permanently removed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you support voice or video calls?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Voice and video calling are on the roadmap. Chatora 1.0 focuses on text, voice messages, media, and AI-powered features — with calling coming in a future release.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="py-20 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto reveal">
+    <div class="micro p-10 sm:p-14 text-center relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-emerald-500/20 blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-cyan-500/20 blur-3xl"></div>
+      <div class="relative">
+        <h2 class="text-[30px] sm:text-[42px] font-bold leading-tight mb-4">Ready to <span class="grad">chat smarter?</span></h2>
+        <p class="text-gray-400 text-[15px] mb-8 max-w-md mx-auto">Free forever, powered by AI, built for real conversations.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="signup.html" class="btn btn-primary">Create free account
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="login.html" class="btn btn-ghost">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-cyan-500/10 pt-14 pb-8 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-10 mb-10">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-2.5 mb-4">
+        <img src="chatora-logo.png" alt="Chatora" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-500 items-center justify-center font-bold text-white text-[13px]">C</div>
+        <span class="brand text-[15px] font-bold text-white">Chatora</span>
+      </div>
+      <p class="text-gray-500 text-[13.5px] max-w-md leading-relaxed">Real-time chat with AI-powered summarization, translation, and voice messaging. Built for modern conversations.</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-4 text-[12px] tracking-wider uppercase">Product</h4>
+      <ul class="space-y-2.5">
+        <li><a href="#features" class="flink">Features</a></li>
+        <li><a href="#ai" class="flink">AI</a></li>
+        <li><a href="#voice" class="flink">Voice</a></li>
+        <li><a href="#faq" class="flink">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-4 text-[12px] tracking-wider uppercase">Account</h4>
+      <ul class="space-y-2.5">
+        <li><a href="login.html" class="flink">Login</a></li>
+        <li><a href="signup.html" class="flink">Sign Up</a></li>
+        <li><a href="chat.html" class="flink">Open Chat</a></li>
+        <li><a href="profile.html" class="flink">Profile</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto pt-6 border-t border-cyan-500/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-gray-500">
+    <span>© 2025 Chatora. All rights reserved.</span>
+    <span>Crafted for modern conversations.</span>
+  </div>
+</footer>
+
+<script>
+  // ============ Typewriter ============
+  const phrases = ['in real time', 'without barriers', 'that think', 'that flow', 'that matter'];
+  const el = document.getElementById('typeTarget');
+  let pi = 0, ci = 0, deleting = false;
+
+  function type() {
+    const phrase = phrases[pi];
+    if (!deleting) {
+      el.textContent = phrase.slice(0, ci + 1);
+      ci++;
+      if (ci === phrase.length) {
+        deleting = true;
+        setTimeout(type, 2000);
+        return;
+      }
+      setTimeout(type, 70);
+    } else {
+      el.textContent = phrase.slice(0, ci - 1);
+      ci--;
+      if (ci === 0) {
+        deleting = false;
+        pi = (pi + 1) % phrases.length;
+        setTimeout(type, 300);
+        return;
+      }
+      setTimeout(type, 35);
+    }
+  }
+  type();
+
+  // ============ Scroll progress ============
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (window.scrollY / h * 100) + '%';
+  });
+
+  // ============ Nav state ============
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 30));
+
+  // ============ Cursor glow ============
+  const glow = document.getElementById('cursorGlow');
+  if (window.matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mousemove', e => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+    });
+  } else { glow.style.display = 'none'; }
+
+  // ============ Reveal ============
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('in'), i * 60);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ============ Card cursor glow ============
+  document.querySelectorAll('.feat, .micro').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // ============ FAQ ============
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!open) item.classList.add('open');
+    });
+  });
+
+  // ============ Stats ============
+  const stats = document.querySelectorAll('.stat');
+  const so = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target, target = +el.dataset.count;
+        let cur = 0;
+        const step = Math.max(1, Math.floor(target / 40));
+        const t = setInterval(() => {
+          cur += step;
+          if (cur >= target) { cur = target; clearInterval(t); }
+          el.textContent = cur;
+        }, 30);
+        so.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  stats.forEach(s => so.observe(s));
+
+  // ============ Smooth anchors ============
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        e.preventDefault();
+        const t = document.querySelector(id);
+        if (t) window.scrollTo({ top: t.offsetTop - 70, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
