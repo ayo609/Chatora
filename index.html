@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chatora — Conversations that think</title>
+<link rel="icon" type="image/png" href="chatora-logo.png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#03060a;--teal:#0F766E;--em:#10B981;--cy:#22D3EE;--text:#e6edf3;--muted:#8392a0;
+  --glass:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.02));--edge:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+h1,h2,h3,h4,.brand{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;font-weight:600}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:8px}
+
+/* ---- Background: aurora + 3D floor grid + orbs ---- */
+.stage{position:fixed;inset:0;z-index:-1;overflow:hidden;perspective:800px}
+.aurora{position:absolute;inset:-20%;filter:blur(80px);animation:drift 30s ease-in-out infinite alternate;
+  background:radial-gradient(circle at 18% 12%,rgba(15,118,110,.38),transparent 38%),
+  radial-gradient(circle at 82% 18%,rgba(16,185,129,.22),transparent 36%),
+  radial-gradient(circle at 50% 95%,rgba(34,211,238,.2),transparent 42%)}
+@keyframes drift{to{transform:translate(-30px,25px) rotate(6deg) scale(1.06)}}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:70%;transform:rotateX(68deg);transform-origin:bottom;
+  background-image:linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.13) 1px,transparent 1px);
+  background-size:64px 64px;animation:floorMove 6s linear infinite;
+  -webkit-mask-image:linear-gradient(to top,#000 0%,transparent 85%);mask-image:linear-gradient(to top,#000 0%,transparent 85%)}
+@keyframes floorMove{to{background-position:0 64px}}
+.orb{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.55),rgba(34,211,238,.35) 25%,rgba(15,118,110,.55) 60%,rgba(4,20,24,.9));
+  box-shadow:0 30px 80px -20px rgba(16,185,129,.5),inset -12px -16px 30px rgba(0,0,0,.45);opacity:.8}
+.o1{width:90px;height:90px;top:16%;left:6%;animation:fl 9s ease-in-out infinite}
+.o2{width:46px;height:46px;top:62%;right:8%;animation:fl 7s ease-in-out infinite -2s}
+.o3{width:140px;height:140px;top:78%;left:-40px;opacity:.5;animation:fl 11s ease-in-out infinite -4s}
+@keyframes fl{50%{transform:translateY(-26px) translateX(10px)}}
+
+#progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:100;background:linear-gradient(90deg,var(--teal),var(--em),var(--cy));box-shadow:0 0 10px var(--cy)}
+
+/* ---- Glass ---- */
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:20px;
+  backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.03),0 30px 60px -30px rgba(0,0,0,.85)}
+.nav{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:min(1120px,calc(100% - 24px));z-index:60;border-radius:16px;
+  background:rgba(8,16,22,.45);transition:background .4s}
+.nav.s{background:rgba(6,12,18,.78)}
+.nl{position:relative;transition:color .3s}.nl:hover{color:var(--cy)}
+
+/* ---- Buttons ---- */
+.btn{position:relative;overflow:hidden;border-radius:12px;font-weight:500;font-size:13.5px;padding:10px 20px;display:inline-flex;align-items:center;gap:8px;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;isolation:isolate}
+.btn-p{color:#fff;background:linear-gradient(135deg,#0F766E,#10B981);box-shadow:0 10px 28px -10px rgba(16,185,129,.8),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-p::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#10B981,#22D3EE);opacity:0;transition:opacity .4s;z-index:-1}
+.btn-p:hover{transform:translateY(-2px) scale(1.02)}.btn-p:hover::before{opacity:1}
+.btn-g{color:#a5f3fc;background:rgba(255,255,255,.05);border:1px solid rgba(34,211,238,.25);backdrop-filter:blur(10px)}
+.btn-g:hover{background:rgba(34,211,238,.12);border-color:var(--cy);transform:translateY(-2px)}
+
+/* ---- Text ---- */
+.grad{background:linear-gradient(120deg,#fff 0%,#67e8f9 45%,#10B981 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gs 7s ease infinite}
+@keyframes gs{to{background-position:200% 50%}}
+.cur{display:inline-block;width:3px;height:.9em;background:var(--cy);margin-left:4px;vertical-align:-.06em;animation:bl 1s step-end infinite;box-shadow:0 0 12px var(--cy)}
+@keyframes bl{50%{opacity:0}}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#a5f3fc;padding:6px 14px;border-radius:999px;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.22)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--em);box-shadow:0 0 8px var(--em)}
+
+/* ---- 3D tilt ---- */
+.scene{perspective:1400px}
+.tilt{transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.z1{transform:translateZ(30px)}.z2{transform:translateZ(60px)}.z3{transform:translateZ(90px)}.z4{transform:translateZ(130px)}
+
+/* ---- Phone ---- */
+.phone{width:290px;border-radius:42px;padding:10px;background:linear-gradient(160deg,#1c2a33,#071014);
+  border:1px solid rgba(255,255,255,.18);box-shadow:0 0 0 2px #0a1318,0 50px 90px -30px rgba(16,185,129,.55),inset 0 0 20px rgba(34,211,238,.08)}
+.screen{border-radius:34px;overflow:hidden;min-height:470px;padding:16px 14px;
+  background:radial-gradient(circle at 30% 0%,rgba(15,118,110,.45),transparent 55%),#050b0f}
+.notch{width:90px;height:22px;border-radius:0 0 14px 14px;background:#050b0f;margin:-16px auto 12px}
+.msg{font-size:12px;padding:9px 12px;border-radius:14px;max-width:82%;line-height:1.45;opacity:0;transform:translateY(10px);animation:pop .5s forwards}
+.in{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px;color:#d1dbe3}
+.out{background:linear-gradient(135deg,#0F766E,#10B981);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+@keyframes pop{to{opacity:1;transform:none}}
+
+.wave{display:flex;align-items:center;gap:3px;height:26px}
+.wave i{width:3px;border-radius:2px;background:linear-gradient(#22D3EE,#10B981);animation:wb 1.2s ease-in-out infinite}
+@keyframes wb{0%,100%{height:25%;opacity:.5}50%{height:100%;opacity:1}}
+
+/* ---- Cards ---- */
+.card{padding:26px;position:relative;overflow:hidden;transition:border-color .4s}
+.card::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,.14),transparent 45%)}
+.card:hover::before{opacity:1}.card:hover{border-color:rgba(34,211,238,.35)}
+.ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;
+  background:linear-gradient(145deg,rgba(34,211,238,.22),rgba(16,185,129,.08));border:1px solid rgba(34,211,238,.25);
+  box-shadow:0 10px 24px -10px rgba(34,211,238,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+
+/* ---- AI tabs ---- */
+.tab{padding:9px 16px;border-radius:12px;font-size:13px;color:var(--muted);cursor:pointer;border:1px solid transparent;transition:all .3s;background:none}
+.tab:hover{color:#fff}
+.tab[aria-selected=true]{color:#fff;background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.35);box-shadow:0 0 24px -8px var(--cy)}
+.pane{display:none;animation:pop .5s forwards;opacity:0}.pane.on{display:block}
+
+/* ---- FAQ ---- */
+.fq{display:flex;width:100%;align-items:center;justify-content:space-between;padding:20px 4px;font-size:15px;font-weight:500;text-align:left;color:var(--text);background:none;border:0;cursor:pointer}
+.fq:hover{color:var(--cy)}
+.fi{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);color:#67e8f9;transition:transform .4s}
+.fa{max-height:0;overflow:hidden;padding:0 4px;color:var(--muted);font-size:14px;line-height:1.7;transition:max-height .5s,padding .4s}
+.it{border-bottom:1px solid rgba(255,255,255,.07)}.it:last-child{border:0}
+.it.open .fi{transform:rotate(45deg)}.it.open .fa{max-height:300px;padding:0 4px 20px}
+
+.flink{color:var(--muted);font-size:13.5px;transition:color .3s}.flink:hover{color:var(--cy)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.v{opacity:1;transform:none}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#03060a}::-webkit-scrollbar-thumb{background:linear-gradient(#0F766E,#10B981);border-radius:4px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.msg,.pane{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="stage"><div class="aurora"></div><div class="floor"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+<!-- NAV -->
+<nav id="nav" class="nav glass">
+  <div class="px-5 h-[56px] flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2.5">
+      <img src="chatora-logo.png" alt="Chatora" class="w-8 h-8 object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-400 items-center justify-center font-bold text-white text-sm">C</div>
+      <span class="brand text-[15px] font-bold text-white">Chatora</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-[13px] text-gray-400">
+      <a href="#features" class="nl">Features</a><a href="#ai" class="nl">AI</a><a href="#voice" class="nl">Voice</a><a href="#faq" class="nl">FAQ</a>
+    </div>
+    <div class="flex gap-2"><a href="login.html" class="btn btn-g">Log in</a><a href="signup.html" class="btn btn-p">Get started</a></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="pt-32 pb-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+    <div class="rv">
+      <span class="chip mb-6"><span class="dot"></span>Chat, voice and AI in one place</span>
+      <h1 class="text-[40px] sm:text-[56px] lg:text-[64px] leading-[1.04] font-bold mb-6">
+        Conversations<br>that <span class="grad" id="tt">think</span><span class="cur"></span>
+      </h1>
+      <p class="text-gray-400 text-[16px] leading-relaxed max-w-lg mb-8">Chatora is instant messaging with AI that summarizes long chats, translates as you type, and suggests replies. Send voice notes when typing is too slow.</p>
+      <div class="flex flex-wrap gap-3 mb-10">
+        <a href="signup.html" class="btn btn-p">Start free</a>
+        <a href="#ai" class="btn btn-g">See the AI</a>
+      </div>
+      <div class="glass inline-grid grid-cols-3 divide-x divide-white/10 text-center">
+        <div class="px-6 py-4"><div class="text-2xl font-bold text-white"><span class="stat" data-c="99">0</span>%</div><div class="text-[11px] text-gray-500 mt-1">Reliable</div></div>
+        <div class="px-6 py-4"><div class="text-2xl font-bold text-white"><span class="stat" data-c="256">0</span></div><div class="text-[11px] text-gray-500 mt-1">Bit secure</div></div>
+        <div class="px-6 py-4"><div class="text-2xl font-bold text-white"><span class="stat" data-c="60">0</span></div><div class="text-[11px] text-gray-500 mt-1">FPS smooth</div></div>
+      </div>
+    </div>
+
+    <!-- 3D phone stack -->
+    <div class="scene rv flex justify-center relative py-6" id="heroScene">
+      <div class="tilt relative" id="heroTilt" data-max="12">
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="flex items-center gap-2.5 pb-3 mb-3 border-b border-white/10">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500"></div>
+              <div><div class="text-[13px] font-medium text-white">Study Group</div><div class="text-[10px] text-emerald-400">Ada, Tunde and 6 more</div></div>
+            </div>
+            <div class="flex flex-col gap-2.5">
+              <div class="msg in" style="animation-delay:.6s">Are we still meeting Saturday?</div>
+              <div class="msg out" style="animation-delay:1.4s">Yes, 4PM. I'll bring the notes 📚</div>
+              <div class="msg in" style="animation-delay:2.2s">Can someone book the room?</div>
+              <div class="msg out" style="animation-delay:3s">On it ✅</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass z4 absolute -left-14 sm:-left-24 top-24 w-[210px] p-4 hidden sm:block" style="animation:fl 6s ease-in-out infinite">
+          <div class="flex items-center gap-2 mb-2"><span>✨</span><span class="text-[12px] font-semibold text-white">AI summary</span></div>
+          <div class="text-[11.5px] text-gray-300 leading-relaxed">Meeting Saturday 4PM. Ada shares notes. Tunde books the room.</div>
+        </div>
+        <div class="glass z3 absolute -right-10 sm:-right-20 bottom-28 w-[200px] p-3.5 hidden sm:block" style="animation:fl 7s ease-in-out infinite -2s">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center flex-shrink-0"><svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <div class="wave flex-1"><i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.4s"></i><i style="animation-delay:.5s"></i><i style="animation-delay:.6s"></i></div>
+            <span class="text-[10px] text-gray-400">0:14</span>
+          </div>
+        </div>
+        <div class="glass z2 absolute -right-6 sm:-right-12 top-6 px-3.5 py-2.5 text-[11.5px] text-gray-200 hidden sm:block" style="animation:fl 8s ease-in-out infinite -4s">🌍 "How far?" → "How are you?"</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- FEATURES (bento) -->
+<section id="features" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="max-w-2xl mb-12 rv">
+      <h2 class="text-[34px] sm:text-[46px] leading-tight mb-4">Everything you need to talk, <span class="grad">nothing you don't.</span></h2>
+      <p class="text-gray-400 text-[15px]">Fast messaging with the details done right.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4 scene">
+      <div class="glass card tilt rv md:col-span-2 md:row-span-1" data-max="6">
+        <div class="ico z2">💬</div>
+        <h3 class="text-xl mb-2">Real-time messaging</h3>
+        <p class="text-gray-400 text-[14px] leading-relaxed max-w-md">Messages land the moment they're sent. No refresh, no waiting.</p>
+        <div class="mt-5 flex gap-2 flex-wrap"><span class="chip">Sent</span><span class="chip">Delivered</span><span class="chip"><span class="dot"></span>Read</span></div>
+      </div>
+      <div class="glass card tilt rv" data-max="8"><div class="ico">👥</div><h3 class="text-lg mb-2">Group chats</h3><p class="text-gray-400 text-[13.5px] leading-relaxed">Study groups, teams and family, with full admin control.</p></div>
+      <div class="glass card tilt rv" data-max="8"><div class="ico">🎙️</div><h3 class="text-lg mb-2">Voice messages</h3><p class="text-gray-400 text-[13.5px] leading-relaxed">Hold to record, release to send.</p></div>
+      <div class="glass card tilt rv" data-max="8"><div class="ico">📎</div><h3 class="text-lg mb-2">Media sharing</h3><p class="text-gray-400 text-[13.5px] leading-relaxed">Images, videos and documents, stored securely.</p></div>
+      <div class="glass card tilt rv" data-max="8"><div class="ico">✓✓</div><h3 class="text-lg mb-2">Read receipts</h3><p class="text-gray-400 text-[13.5px] leading-relaxed">See when a message is sent, delivered and read.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- AI (interactive) -->
+<section id="ai" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-[.9fr_1.1fr] gap-12 items-center">
+    <div class="rv">
+      <h2 class="text-[34px] sm:text-[46px] leading-tight mb-4">AI built into <span class="grad">every chat.</span></h2>
+      <p class="text-gray-400 text-[15px] leading-relaxed mb-8 max-w-md">Pick a tool and see what it does with a real conversation.</p>
+      <div role="tablist" class="flex flex-wrap gap-2">
+        <button class="tab" role="tab" aria-selected="true" data-p="p1">✨ Summarizer</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="p2">🌍 Translation</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="p3">⚡ Smart replies</button>
+      </div>
+    </div>
+    <div class="scene rv">
+      <div class="glass tilt p-6 sm:p-8 min-h-[290px]" data-max="7">
+        <div class="pane on" id="p1">
+          <div class="text-[12px] text-gray-500 mb-3">You were away for 47 messages</div>
+          <ul class="space-y-3 text-[14px] text-gray-200 z2">
+            <li class="flex gap-3"><span class="text-cyan-400">•</span>Study session is Saturday at 4PM</li>
+            <li class="flex gap-3"><span class="text-cyan-400">•</span>Ada shared the notes PDF</li>
+            <li class="flex gap-3"><span class="text-cyan-400">•</span>Tunde will book the room</li>
+          </ul>
+        </div>
+        <div class="pane" id="p2">
+          <div class="text-[12px] text-gray-500 mb-3">Pidgin to English</div>
+          <div class="msg in !opacity-100 !transform-none mb-3 !max-w-full" style="animation:none">How far? You don chop?</div>
+          <div class="msg out !opacity-100 !transform-none !max-w-full" style="animation:none">Hey, how are you? Have you eaten?</div>
+          <div class="text-[12px] text-gray-500 mt-4">Also supports Yoruba, Hausa, Igbo and more.</div>
+        </div>
+        <div class="pane" id="p3">
+          <div class="text-[12px] text-gray-500 mb-3">Ada asks: "Are you joining the call?"</div>
+          <div class="flex flex-wrap gap-2 z2">
+            <button class="btn btn-g">Give me 2 minutes</button><button class="btn btn-g">Joining now</button><button class="btn btn-g">Can't today</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICE -->
+<section id="voice" class="py-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
+    <div class="rv">
+      <h2 class="text-[34px] sm:text-[46px] leading-tight mb-5">Speak instead of <span class="grad">typing.</span></h2>
+      <p class="text-gray-400 text-[15px] leading-relaxed mb-7 max-w-md">For long thoughts and quick reactions, hold the mic and send a voice note.</p>
+      <ul class="space-y-3 text-gray-300 text-[14px]">
+        <li class="flex items-center gap-3"><span class="dot"></span>Hold to record, release to send</li>
+        <li class="flex items-center gap-3"><span class="dot"></span>Works on any device with a microphone</li>
+        <li class="flex items-center gap-3"><span class="dot"></span>Waveform playback inside the chat</li>
+      </ul>
+    </div>
+    <div class="scene rv">
+      <div class="glass tilt p-7 max-w-sm mx-auto text-center" data-max="10">
+        <div class="relative mx-auto w-24 h-24 z3 mb-6">
+          <span class="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping"></span>
+          <div class="relative w-24 h-24 rounded-full flex items-center justify-center" style="background:radial-gradient(circle at 30% 25%,#67e8f9,#10B981 55%,#0F766E);box-shadow:0 20px 40px -12px rgba(16,185,129,.8),inset 0 2px 6px rgba(255,255,255,.5)">
+            <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </div>
+        </div>
+        <div class="wave justify-center z2"><i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.4s"></i><i style="animation-delay:.5s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.7s"></i><i style="animation-delay:.8s"></i><i style="animation-delay:.9s"></i></div>
+        <div class="text-[12px] text-gray-400 mt-4">Recording · 0:23</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="py-24 px-5 sm:px-8">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12 rv">
+      <h2 class="text-[34px] sm:text-[46px] leading-tight mb-3">Questions, <span class="grad">answered.</span></h2>
+      <p class="text-gray-400 text-[15px]">Everything you need to know about Chatora.</p>
+    </div>
+    <div class="glass px-6 sm:px-8 py-2 rv" id="faqList">
+      <div class="it"><button class="fq" aria-expanded="false">Is Chatora free to use?<span class="fi">+</span></button><div class="fa">Yes. It's free for personal use. Create an account, chat with friends, send voice notes and use the AI features without paying.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">How is Chatora different from other chat apps?<span class="fi">+</span></button><div class="fa">Chatora adds an AI layer to messaging: summaries, real-time translation and smart replies inside every conversation.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Is my data safe?<span class="fi">+</span></button><div class="fa">Your messages and media are protected by modern authentication and access rules. Only you and the people you chat with can see your conversations.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Can I send voice messages?<span class="fi">+</span></button><div class="fa">Yes. Hold the microphone button in any chat to record and release to send. Voice notes play inline.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">What languages does the AI translate?<span class="fi">+</span></button><div class="fa">Major world languages plus Nigerian languages including Pidgin, Yoruba, Hausa and Igbo. More are added regularly.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Do I need to download an app?<span class="fi">+</span></button><div class="fa">No. Chatora runs in your browser on phone, tablet or desktop. Open it and sign in.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Can I create group chats?<span class="fi">+</span></button><div class="fa">Yes. Create unlimited groups, add or remove members anytime, and use admin controls.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Will it work on slow internet?<span class="fi">+</span></button><div class="fa">Yes. Chatora is lightweight and reconnects gracefully on unstable networks.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Can I delete my account?<span class="fi">+</span></button><div class="fa">Yes. Delete it from Settings at any time and all your data is permanently removed.</div></div>
+      <div class="it"><button class="fq" aria-expanded="false">Do you support voice or video calls?<span class="fi">+</span></button><div class="fa">Calling is on the roadmap. Chatora 1.0 focuses on text, voice messages, media and AI features.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto rv scene">
+    <div class="glass tilt p-10 sm:p-16 text-center relative overflow-hidden" data-max="5">
+      <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-emerald-500/25 blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
+      <div class="relative z2">
+        <h2 class="text-[32px] sm:text-[46px] leading-tight mb-4">Ready to <span class="grad">chat smarter?</span></h2>
+        <p class="text-gray-400 text-[15px] mb-8 max-w-md mx-auto">Free to use, powered by AI, built for real conversations.</p>
+        <div class="flex flex-wrap justify-center gap-3"><a href="signup.html" class="btn btn-p">Create free account</a><a href="login.html" class="btn btn-g">Log in</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/10 pt-14 pb-8 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-10 mb-10">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-2.5 mb-4">
+        <img src="chatora-logo.png" alt="Chatora" class="w-8 h-8 object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-400 items-center justify-center font-bold text-white text-sm">C</div>
+        <span class="brand text-[15px] font-bold text-white">Chatora</span>
+      </div>
+      <p class="text-gray-500 text-[13.5px] max-w-md leading-relaxed">Real-time chat with AI summaries, translation and voice messages.</p>
+    </div>
+    <div><h4 class="text-white font-semibold mb-4 text-sm">Product</h4><ul class="space-y-2.5"><li><a href="#features" class="flink">Features</a></li><li><a href="#ai" class="flink">AI</a></li><li><a href="#voice" class="flink">Voice</a></li><li><a href="#faq" class="flink">FAQ</a></li></ul></div>
+    <div><h4 class="text-white font-semibold mb-4 text-sm">Account</h4><ul class="space-y-2.5"><li><a href="login.html" class="flink">Log in</a></li><li><a href="signup.html" class="flink">Sign up</a></li><li><a href="chat.html" class="flink">Open chat</a></li><li><a href="profile.html" class="flink">Profile</a></li></ul></div>
+  </div>
+  <div class="max-w-6xl mx-auto pt-6 border-t border-white/10 text-[12px] text-gray-500">© 2025 Chatora. All rights reserved.</div>
+</footer>
+
+<script>
+const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+// typewriter
+const ph=['think','flow','matter','translate'],tt=document.getElementById('tt');let pi=0,ci=0,del=false;
+(function ty(){const p=ph[pi];tt.textContent=p.slice(0,del?--ci:++ci);
+  if(!del&&ci===p.length){del=true;return setTimeout(ty,2000)}
+  if(del&&ci===0){del=false;pi=(pi+1)%ph.length;return setTimeout(ty,300)}
+  setTimeout(ty,del?35:75)})();
+// progress + nav
+const pr=document.getElementById('progress'),nav=document.getElementById('nav');
+addEventListener('scroll',()=>{pr.style.width=scrollY/(document.documentElement.scrollHeight-innerHeight)*100+'%';nav.classList.toggle('s',scrollY>30)},{passive:true});
+// reveal
+const io=new IntersectionObserver(es=>es.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('v'),i*70);io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.rv').forEach(e=>io.observe(e));
+// 3D tilt + spotlight
+if(matchMedia('(pointer:fine)').matches&&!rm){
+  document.querySelectorAll('.tilt').forEach(el=>{
+    const max=+el.dataset.max||8;
+    el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      el.style.transform=`rotateY(${x*max*2}deg) rotateX(${-y*max*2}deg)`;
+      el.style.setProperty('--mx',e.clientX-r.left+'px');el.style.setProperty('--my',e.clientY-r.top+'px')});
+    el.addEventListener('mouseleave',()=>el.style.transform='');
+  });
+  // hero reacts to the whole screen
+  const ht=document.getElementById('heroTilt');
+  addEventListener('mousemove',e=>{ht.style.transform=`rotateY(${(e.clientX/innerWidth-.5)*24}deg) rotateX(${-(e.clientY/innerHeight-.5)*16}deg)`});
+}
+// stats
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const el=e.target,t=+el.dataset.c,s=Math.max(1,Math.floor(t/40));let c=0;
+  const iv=setInterval(()=>{c=Math.min(t,c+s);el.textContent=c;if(c>=t)clearInterval(iv)},30);so.unobserve(el)}}),{threshold:.5});
+document.querySelectorAll('.stat').forEach(s=>so.observe(s));
+// AI tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===t.dataset.p))}));
+// FAQ
+document.querySelectorAll('.it').forEach(it=>it.querySelector('.fq').addEventListener('click',e=>{
+  const o=it.classList.contains('open');
+  document.querySelectorAll('.it').forEach(i=>{i.classList.remove('open');i.querySelector('.fq').setAttribute('aria-expanded',false)});
+  if(!o){it.classList.add('open');e.currentTarget.setAttribute('aria-expanded',true)}}));
+// anchors
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+  const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();scrollTo({top:t.offsetTop-80,behavior:'smooth'})}}));
+</script>
+</body>
+</html>
