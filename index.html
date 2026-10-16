@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chatora — Intelligent Conversations, Real-Time</title>
+<link rel="icon" type="image/png" href="chatora-logo.png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030609;
+    --surface: #0a1219;
+    --teal: #0F766E;
+    --emerald: #10B981;
+    --cyan: #22D3EE;
+    --text: #e6edf3;
+    --muted: #8b98a5;
+  }
+
+  * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+  h1,h2,h3,h4,h5,.brand { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Background: aurora mesh + grid ---------- */
+  .bg-stage { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+
+  .bg-stage::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .mesh {
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(15,118,110,0.35), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(16,185,129,0.25), transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(34,211,238,0.22), transparent 45%),
+      radial-gradient(circle at 90% 70%, rgba(16,185,129,0.18), transparent 40%);
+    filter: blur(60px);
+    animation: meshDrift 25s ease-in-out infinite alternate;
+  }
+  @keyframes meshDrift {
+    0% { transform: translate(0,0) rotate(0deg) scale(1); }
+    100% { transform: translate(-40px, 30px) rotate(8deg) scale(1.08); }
+  }
+
+  /* ---------- Noise texture ---------- */
+  .noise {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  /* ---------- Scroll progress ---------- */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--emerald), var(--cyan));
+    z-index: 100; width: 0%; transition: width 0.1s linear;
+    box-shadow: 0 0 12px var(--cyan);
+  }
+
+  /* ---------- Cursor glow ---------- */
+  .cursor-glow {
+    position: fixed; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,211,238,0.09), transparent 60%);
+    pointer-events: none; z-index: 1; transform: translate(-50%,-50%);
+    transition: opacity 0.3s ease;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav-wrap {
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background: rgba(3,6,9,0.55);
+    border-bottom: 1px solid rgba(34,211,238,0.08);
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .nav-wrap.scrolled {
+    background: rgba(3,6,9,0.85);
+    border-bottom-color: rgba(34,211,238,0.15);
+  }
+  .nav-link { position: relative; transition: color 0.3s; }
+  .nav-link::after {
+    content: ''; position: absolute; left: 0; bottom: -6px;
+    width: 0; height: 1px; background: var(--cyan);
+    transition: width 0.35s cubic-bezier(.2,.8,.2,1);
+  }
+  .nav-link:hover { color: var(--cyan); }
+  .nav-link:hover::after { width: 100%; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    position: relative; overflow: hidden; border-radius: 12px;
+    font-weight: 500; transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease;
+    isolation: isolate;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #0F766E 0%, #10B981 100%);
+    color: #fff;
+    box-shadow: 0 10px 30px -10px rgba(16,185,129,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, #10B981 0%, #22D3EE 100%);
+    opacity: 0; transition: opacity 0.4s; z-index: -1;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -12px rgba(16,185,129,0.9); }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: rgba(34,211,238,0.04);
+    border: 1px solid rgba(34,211,238,0.25);
+    color: #7dd3fc;
+    backdrop-filter: blur(8px);
+  }
+  .btn-ghost:hover {
+    background: rgba(34,211,238,0.1);
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -12px rgba(34,211,238,0.5);
+  }
+
+  /* ---------- Reveal ---------- */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 1s cubic-bezier(.2,.8,.2,1), transform 1s cubic-bezier(.2,.8,.2,1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---------- Glass card ---------- */
+  .glass {
+    background: linear-gradient(160deg, rgba(15,118,110,0.12) 0%, rgba(10,18,25,0.7) 60%);
+    border: 1px solid rgba(34,211,238,0.12);
+    border-radius: 22px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 20px 50px -30px rgba(0,0,0,0.8);
+    position: relative; overflow: hidden;
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1), border-color 0.4s, box-shadow 0.5s;
+  }
+  .glass::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(34,211,238,0.12), transparent 40%);
+    opacity: 0; transition: opacity 0.4s; pointer-events: none;
+  }
+  .glass:hover::before { opacity: 1; }
+  .glass:hover {
+    transform: translateY(-6px);
+    border-color: rgba(34,211,238,0.32);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 30px 60px -30px rgba(34,211,238,0.4);
+  }
+
+  /* ---------- Bento grid ---------- */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .bento > * { grid-column: span 12; }
+  @media (min-width: 768px) {
+    .b-span-6 { grid-column: span 6; }
+    .b-span-4 { grid-column: span 4; }
+    .b-span-8 { grid-column: span 8; }
+    .b-span-12 { grid-column: span 12; }
+  }
+
+  /* ---------- Hero glow text ---------- */
+  .glow {
+    background: linear-gradient(120deg, #ffffff 0%, #67e8f9 40%, #10B981 75%, #ffffff 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: glowShift 8s ease infinite;
+  }
+  @keyframes glowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* ---------- Badge ---------- */
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(34,211,238,0.08);
+    border: 1px solid rgba(34,211,238,0.25);
+    font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #67e8f9; font-weight: 500;
+    backdrop-filter: blur(10px);
+  }
+  .pill-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #10B981;
+    box-shadow: 0 0 10px #10B981;
+    animation: pulseDot 2s ease infinite;
+  }
+  @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ---------- Phone ---------- */
+  .phone {
+    width: 300px; height: 600px; border-radius: 46px;
+    background: linear-gradient(150deg, #0a1219, #030609);
+    border: 1px solid rgba(34,211,238,0.2);
+    padding: 12px; position: relative;
+    box-shadow:
+      0 60px 120px -40px rgba(16,185,129,0.5),
+      0 0 0 1px rgba(34,211,238,0.08),
+      inset 0 0 60px rgba(34,211,238,0.06);
+    animation: phoneFloat 7s ease-in-out infinite;
+  }
+  @keyframes phoneFloat {
+    0%,100% { transform: translateY(0) rotateZ(-1deg); }
+    50% { transform: translateY(-18px) rotateZ(1deg); }
+  }
+  .phone-inner {
+    width: 100%; height: 100%; border-radius: 36px; overflow: hidden;
+    background: radial-gradient(circle at 50% 0%, rgba(16,185,129,0.12), transparent 60%), #060a0e;
+    position: relative;
+  }
+  .notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 26px; background: #000;
+    border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 3;
+  }
+  .msg { border-radius: 18px; padding: 11px 15px; font-size: 13px; margin: 8px 14px; max-width: 78%; opacity: 0; animation: popUp .6s cubic-bezier(.2,.9,.2,1) forwards; }
+  .msg-in { background: rgba(20,30,40,0.95); border: 1px solid rgba(34,211,238,0.1); border-bottom-left-radius: 6px; }
+  .msg-out { background: linear-gradient(135deg, #0F766E, #10B981); color: #fff; margin-left: auto; border-bottom-right-radius: 6px; box-shadow: 0 8px 20px -8px rgba(16,185,129,0.6); }
+  @keyframes popUp { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* ---------- FAQ accordion ---------- */
+  .faq-item {
+    border-bottom: 1px solid rgba(34,211,238,0.1);
+    transition: background 0.3s;
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 8px; cursor: pointer; font-weight: 500; font-size: 16px;
+    transition: color 0.3s;
+  }
+  .faq-q:hover { color: var(--cyan); }
+  .faq-icon {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(34,211,238,0.08);
+    border: 1px solid rgba(34,211,238,0.25);
+    transition: transform 0.4s cubic-bezier(.2,.8,.2,1), background 0.3s;
+    color: #67e8f9;
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); background: rgba(34,211,238,0.2); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(.2,.8,.2,1), padding 0.4s ease;
+    padding: 0 8px; color: var(--muted); font-size: 14.5px; line-height: 1.7;
+  }
+  .faq-item.open .faq-a { max-height: 400px; padding: 0 8px 22px; }
+
+  /* ---------- Marquee ---------- */
+  .marquee { display: flex; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+  .marquee-track { display: flex; gap: 60px; animation: scroll 40s linear infinite; flex-shrink: 0; }
+  @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ---------- Stat ---------- */
+  .stat-num {
+    font-size: 44px; font-weight: 700; line-height: 1;
+    background: linear-gradient(180deg, #fff, #67e8f9);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- Mic ---------- */
+  .mic-core {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: linear-gradient(135deg, #0F766E, #10B981);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 20px 50px -15px rgba(16,185,129,0.8), inset 0 2px 0 rgba(255,255,255,0.2);
+  }
+  .mic-core::before, .mic-core::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid rgba(16,185,129,0.6);
+    animation: micRipple 2.6s ease-out infinite;
+  }
+  .mic-core::after { animation-delay: 1.3s; }
+  @keyframes micRipple { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.1); opacity: 0; } }
+
+  /* ---------- Footer link ---------- */
+  .flink { color: var(--muted); font-size: 14px; transition: color 0.3s, transform 0.3s; display: inline-block; }
+  .flink:hover { color: var(--cyan); transform: translateX(4px); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #030609; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(#0F766E, #10B981); border-radius: 4px; }
+
+  @media (max-width: 640px) {
+    .phone { width: 260px; height: 520px; }
+    .stat-num { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="bg-stage"><div class="mesh"></div></div>
+<div class="noise"></div>
+
+<!-- ============ NAV ============ -->
+<nav id="nav" class="fixed top-0 left-0 right-0 z-50 nav-wrap">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-3 group">
+      <img src="chatora-logo.png" alt="Chatora" class="w-9 h-9 object-contain transition-transform group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="hidden w-9 h-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-500 items-center justify-center font-bold text-white text-sm">C</div>
+      <span class="brand text-lg font-bold text-white tracking-tight">Chatora</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-9 text-[13.5px] font-medium text-gray-400">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#ai" class="nav-link">AI</a>
+      <a href="#voice" class="nav-link">Voice</a>
+      <a href="#how" class="nav-link">How it Works</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <a href="login.html" class="btn btn-ghost px-4 py-2 text-[13.5px]">Login</a>
+      <a href="signup.html" class="btn btn-primary px-4 py-2 text-[13.5px]">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="relative pt-32 pb-24 px-5 sm:px-8 overflow-hidden">
+  <div class="max-w-7xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+    <div class="reveal">
+      <div class="pill mb-7"><span class="pill-dot"></span>Introducing Chatora 1.0</div>
+      <h1 class="text-[44px] sm:text-[64px] lg:text-[72px] leading-[1.03] font-bold tracking-tight mb-7">
+        Intelligent<br/>conversations,<br/><span class="glow">in real time.</span>
+      </h1>
+      <p class="text-gray-400 text-lg leading-relaxed max-w-xl mb-9">
+        Chatora blends instant messaging with AI that summarizes, translates, and understands your conversations — plus crystal-clear voice notes. Built on Firebase. Designed for the modern web.
+      </p>
+      <div class="flex flex-wrap gap-3.5 mb-12">
+        <a href="signup.html" class="btn btn-primary px-7 py-3.5 text-[14.5px]">Start free →</a>
+        <a href="login.html" class="btn btn-ghost px-7 py-3.5 text-[14.5px]">Sign in</a>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6 max-w-lg">
+        <div><div class="stat-num" data-count="99">0</div><div class="text-xs text-gray-500 mt-1.5">% Uptime</div></div>
+        <div><div class="stat-num" data-count="256">0</div><div class="text-xs text-gray-500 mt-1.5">Bit Secured</div></div>
+        <div><div class="stat-num" data-count="24">0</div><div class="text-xs text-gray-500 mt-1.5">/7 Real-time</div></div>
+      </div>
+    </div>
+
+    <div class="reveal flex justify-center lg:justify-end">
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="notch"></div>
+          <div class="pt-12">
+            <div class="px-4 py-3 flex items-center gap-3 border-b border-cyan-500/10">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500"></div>
+              <div>
+                <div class="text-sm font-medium text-white">Ada Nwosu</div>
+                <div class="text-[11px] text-emerald-400 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Online</div>
+              </div>
+            </div>
+            <div class="msg msg-in" style="animation-delay:.3s;">Hey! Are you joining the study group? 📚</div>
+            <div class="msg msg-out" style="animation-delay:.9s;">Yes! Give me 2 minutes</div>
+            <div class="msg msg-in" style="animation-delay:1.4s;">Did you see yesterday's notes?</div>
+            <div class="msg msg-out" style="animation-delay:1.9s;">Just sent them 📎</div>
+            <div class="msg msg-in" style="animation-delay:2.4s; background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(16,185,129,.18)); border:1px solid rgba(34,211,238,.4);">
+              <div class="text-[10px] uppercase tracking-widest text-cyan-300 mb-1">✨ AI Summary</div>
+              Study group planned. Notes shared for review.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="max-w-7xl mx-auto mt-24 marquee opacity-50">
+    <div class="marquee-track">
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Powered by Firebase</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Real-Time Firestore</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Secure Auth</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">AI Powered</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Voice Notes</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Zero Lag</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Powered by Firebase</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Real-Time Firestore</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Secure Auth</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">AI Powered</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Voice Notes</span>
+      <span class="text-sm tracking-widest text-gray-500 uppercase">Zero Lag</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES (Bento) ============ -->
+<section id="features" class="py-28 px-5 sm:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-20 reveal">
+      <div class="pill mb-5"><span class="pill-dot"></span>Core Features</div>
+      <h2 class="text-4xl sm:text-[52px] font-bold tracking-tight mb-5">Built for <span class="glow">real conversations.</span></h2>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">Every feature you expect — engineered with speed, security, and the modern web in mind.</p>
+    </div>
+
+    <div class="bento">
+      <div class="glass b-span-8 p-8 reveal">
+        <div class="text-3xl mb-4">💬</div>
+        <h3 class="text-2xl font-semibold mb-3">Real-Time Messaging</h3>
+        <p class="text-gray-400 text-[15px] leading-relaxed max-w-xl">Messages appear the instant they're sent, powered by Firebase Firestore's real-time listeners. No refresh. No delay. Just seamless conversation.</p>
+      </div>
+
+      <div class="glass b-span-4 p-8 reveal">
+        <div class="text-3xl mb-4">👥</div>
+        <h3 class="text-xl font-semibold mb-3">Group Chats</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">Create study groups, team spaces, or family chats. Add and manage members with admin controls.</p>
+      </div>
+
+      <div class="glass b-span-4 p-8 reveal">
+        <div class="text-3xl mb-4">🎙️</div>
+        <h3 class="text-xl font-semibold mb-3">Voice Messages</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">Hold to record. Release to send. Crystal-clear voice notes delivered instantly to anyone.</p>
+      </div>
+
+      <div class="glass b-span-4 p-8 reveal">
+        <div class="text-3xl mb-4">📎</div>
+        <h3 class="text-xl font-semibold mb-3">Media Sharing</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">Images, videos, documents — securely stored and instantly accessible.</p>
+      </div>
+
+      <div class="glass b-span-4 p-8 reveal">
+        <div class="text-3xl mb-4">✓✓</div>
+        <h3 class="text-xl font-semibold mb-3">Read Receipts</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">WhatsApp-style ticks: sent, delivered, and read. Know exactly when your message lands.</p>
+      </div>
+
+      <div class="glass b-span-12 p-8 reveal">
+        <div class="grid md:grid-cols-[1fr_auto] gap-8 items-center">
+          <div>
+            <div class="text-3xl mb-4">🟢</div>
+            <h3 class="text-2xl font-semibold mb-3">Online Status, Typing Indicators &amp; Presence</h3>
+            <p class="text-gray-400 text-[15px] leading-relaxed max-w-2xl">See who's online in real time, watch typing indicators as friends compose, and check last-seen timestamps — all synced instantly across devices.</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/60 animate-pulse" style="animation-delay:.3s"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/30 animate-pulse" style="animation-delay:.6s"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AI ============ -->
+<section id="ai" class="py-28 px-5 sm:px-8 relative">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-20 reveal">
+      <div class="pill mb-5"><span class="pill-dot"></span>AI Integration</div>
+      <h2 class="text-4xl sm:text-[52px] font-bold tracking-tight mb-5">AI that <span class="glow">works for you.</span></h2>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">Chatora isn't just another chat app. Intelligence is woven into every conversation.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mb-14">
+      <div class="glass p-8 reveal">
+        <div class="text-3xl mb-4">✨</div>
+        <h3 class="text-xl font-semibold mb-3">Chat Summarizer</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">Missed 200 messages? One tap and Chatora gives you a clean summary of everything important — in seconds.</p>
+      </div>
+      <div class="glass p-8 reveal">
+        <div class="text-3xl mb-4">🌍</div>
+        <h3 class="text-xl font-semibold mb-3">Real-Time Translation</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">Chat across languages without missing a word. English, Pidgin, Yoruba, Hausa, Igbo — translated inline.</p>
+      </div>
+      <div class="glass p-8 reveal">
+        <div class="text-3xl mb-4">⚡</div>
+        <h3 class="text-xl font-semibold mb-3">Smart Replies</h3>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed">AI-suggested responses based on context. Never stare at a blank input box again.</p>
+      </div>
+    </div>
+
+    <div class="glass max-w-4xl mx-auto p-8 reveal">
+      <div class="flex items-center gap-3 mb-6 pb-6 border-b border-cyan-500/10">
+        <div class="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center text-lg">✨</div>
+        <div>
+          <div class="font-semibold text-white">AI Summary</div>
+          <div class="text-xs text-gray-500">Generated from 47 messages · just now</div>
+        </div>
+      </div>
+      <div class="space-y-4 text-[15px] text-gray-300 leading-relaxed">
+        <p class="flex gap-3"><span class="text-cyan-400">•</span>The group planned a study session for Saturday at 4 PM.</p>
+        <p class="flex gap-3"><span class="text-cyan-400">•</span>Ada shared the lecture notes PDF — everyone should review pages 12–20.</p>
+        <p class="flex gap-3"><span class="text-cyan-400">•</span>Three members confirmed attendance. Two are yet to respond.</p>
+        <p class="flex gap-3"><span class="text-cyan-400">•</span>Next action: Tunde will book the library room.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VOICE ============ -->
+<section id="voice" class="py-28 px-5 sm:px-8">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+    <div class="reveal flex justify-center">
+      <div class="mic-core">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-11 h-11 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-2.08A7 7 0 0019 12h-2z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="pill mb-6"><span class="pill-dot"></span>Voice Messages</div>
+      <h2 class="text-4xl sm:text-[48px] font-bold tracking-tight mb-5 leading-tight">Speak instead<br/>of <span class="glow">typing.</span></h2>
+      <p class="text-gray-400 text-lg leading-relaxed mb-8">Not in the mood to type? Hold the mic and send a voice note in seconds. Chatora records, uploads, and delivers instantly.</p>
+      <ul class="space-y-3.5 text-gray-300 text-[15px]">
+        <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Hold to record, release to send</li>
+        <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Works on any device with a microphone</li>
+        <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Securely stored in Firebase Storage</li>
+        <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Inline playback with waveform preview</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW ============ -->
+<section id="how" class="py-28 px-5 sm:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-20 reveal">
+      <div class="pill mb-5"><span class="pill-dot"></span>Getting Started</div>
+      <h2 class="text-4xl sm:text-[52px] font-bold tracking-tight mb-5">Live in <span class="glow">under a minute.</span></h2>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">No downloads. No complicated setup. Just open Chatora and start.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="glass p-7 reveal text-center">
+        <div class="text-5xl font-bold mb-4 glow">01</div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Create Account</h3>
+        <p class="text-gray-400 text-[14px] leading-relaxed">Sign up with email in seconds — or use Google for one-tap access.</p>
+      </div>
+      <div class="glass p-7 reveal text-center">
+        <div class="text-5xl font-bold mb-4 glow">02</div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Find People</h3>
+        <p class="text-gray-400 text-[14px] leading-relaxed">Search users by name or email, or create a group in one tap.</p>
+      </div>
+      <div class="glass p-7 reveal text-center">
+        <div class="text-5xl font-bold mb-4 glow">03</div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Start Chatting</h3>
+        <p class="text-gray-400 text-[14px] leading-relaxed">Send text, voice notes, images — everything in real time.</p>
+      </div>
+      <div class="glass p-7 reveal text-center">
+        <div class="text-5xl font-bold mb-4 glow">04</div>
+        <h3 class="text-lg font-semibold mb-2 text-white">Let AI Assist</h3>
+        <p class="text-gray-400 text-[14px] leading-relaxed">Summarize, translate, and reply smarter with built-in AI.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="py-28 px-5 sm:px-8">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <div class="pill mb-5"><span class="pill-dot"></span>FAQ</div>
+      <h2 class="text-4xl sm:text-[52px] font-bold tracking-tight mb-5">Questions, <span class="glow">answered.</span></h2>
+      <p class="text-gray-400 text-lg">Everything you need to know about Chatora.</p>
+    </div>
+
+    <div class="glass px-7 sm:px-10 reveal" id="faqList">
+      <div class="faq-item">
+        <div class="faq-q">Is Chatora free to use?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Chatora is completely free for personal use. Create an account, chat with friends, send voice notes, and use the AI features — all without paying. No hidden charges.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is Chatora different from WhatsApp?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Chatora adds an AI layer on top of standard messaging. You get chat summarization (catch up on missed messages instantly), real-time translation across languages, and smart reply suggestions — features WhatsApp doesn't offer.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is my data safe?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Your messages and media are stored securely on Google Firebase infrastructure with authentication and access rules enforced. Only you and the people you chat with can see your conversations.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I send voice messages?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Hold the microphone button in any chat to record. Release to send. Your voice note is uploaded securely and delivered instantly to the recipient, who can play it inline.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What languages does the AI translate?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Chatora's translation supports major world languages plus Nigerian languages including Pidgin, Yoruba, Hausa, and Igbo. More languages are being added regularly.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need to download an app?<span class="faq-icon">+</span></div>
+        <div class="faq-a">No download required. Chatora runs entirely in your web browser — on phone, tablet, or desktop. Just open the site and sign in.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I create group chats?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Create unlimited group chats for friends, family, study groups, or teams. Add or remove members anytime. Group admins have full control over membership.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does the AI summarizer work?<span class="faq-icon">+</span></div>
+        <div class="faq-a">When you tap "Summarize", Chatora sends the recent messages in that chat to our AI engine, which analyzes the conversation and returns a concise summary highlighting decisions, action items, and key points.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Will Chatora work on slow internet?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Chatora is built to be lightweight. Messages are optimized for minimal data usage, and Firebase handles reconnection gracefully — so you stay connected even on unstable networks.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I delete my account?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. You can delete your account at any time from Settings. All your personal data, messages, and media will be permanently removed from our systems.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you support video or voice calls?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Voice and video calling are on our product roadmap. Chatora 1.0 focuses on text, voice messages, media sharing, and AI-powered features — with calling arriving in a future release.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I report a problem or send feedback?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Head to Settings → Help &amp; Feedback inside the app, or email our team directly. We read every message and use feedback to improve Chatora continuously.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="py-24 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto reveal">
+    <div class="glass p-12 sm:p-16 text-center relative overflow-hidden">
+      <div class="absolute -top-32 -right-32 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl"></div>
+      <div class="absolute -bottom-32 -left-32 w-72 h-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
+      <div class="relative">
+        <h2 class="text-4xl sm:text-[52px] font-bold tracking-tight mb-5 leading-tight">Ready to <span class="glow">chat smarter?</span></h2>
+        <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto">Join Chatora today — free forever, powered by AI, built for real conversations.</p>
+        <div class="flex flex-wrap justify-center gap-3.5">
+          <a href="signup.html" class="btn btn-primary px-8 py-4 text-[15px]">Create free account →</a>
+          <a href="login.html" class="btn btn-ghost px-8 py-4 text-[15px]">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-cyan-500/10 pt-16 pb-10 px-5 sm:px-8">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-10 mb-12">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-3 mb-5">
+        <img src="chatora-logo.png" alt="Chatora" class="w-9 h-9 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="hidden w-9 h-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-500 items-center justify-center font-bold text-white text-sm">C</div>
+        <span class="brand text-lg font-bold text-white">Chatora</span>
+      </div>
+      <p class="text-gray-500 text-[14px] max-w-md leading-relaxed">Real-time chat with AI-powered summarization, translation, and voice messaging. Built for modern conversations.</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-5 text-sm tracking-wider uppercase">Product</h4>
+      <ul class="space-y-3">
+        <li><a href="#features" class="flink">Features</a></li>
+        <li><a href="#ai" class="flink">AI Integration</a></li>
+        <li><a href="#voice" class="flink">Voice Messages</a></li>
+        <li><a href="#faq" class="flink">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-5 text-sm tracking-wider uppercase">Account</h4>
+      <ul class="space-y-3">
+        <li><a href="login.html" class="flink">Login</a></li>
+        <li><a href="signup.html" class="flink">Sign Up</a></li>
+        <li><a href="chat.html" class="flink">Open Chat</a></li>
+        <li><a href="profile.html" class="flink">Profile</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto pt-8 border-t border-cyan-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+    <span>© 2025 Chatora. All rights reserved.</span>
+    <span>Built with Firebase · React-ready · AI-powered</span>
+  </div>
+</footer>
+
+<script>
+  // ============ Scroll progress ============
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (window.scrollY / h * 100) + '%';
+  });
+
+  // ============ Nav scrolled state ============
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+  });
+
+  // ============ Cursor glow ============
+  const glow = document.getElementById('cursorGlow');
+  if (window.matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mousemove', (e) => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+    });
+  } else {
+    glow.style.display = 'none';
+  }
+
+  // ============ Reveal on scroll ============
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('in'), i * 70);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ============ 3D cursor glow on glass cards ============
+  document.querySelectorAll('.glass').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // ============ FAQ accordion ============
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // ============ Animated stat counters ============
+  const stats = document.querySelectorAll('.stat-num');
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.count);
+        let cur = 0;
+        const step = Math.max(1, Math.floor(target / 40));
+        const t = setInterval(() => {
+          cur += step;
+          if (cur >= target) { cur = target; clearInterval(t); }
+          el.textContent = cur;
+        }, 30);
+        statObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  stats.forEach(s => statObserver.observe(s));
+
+  // ============ Smooth anchor scroll with offset ============
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('href');
+      if (id.length > 1) {
+        e.preventDefault();
+        const el = document.querySelector(id);
+        if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
