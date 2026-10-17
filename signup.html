@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create your account | Chatora</title>
+<link rel="icon" type="image/png" href="chatora-logo.png" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#03060a;--teal:#0F766E;--em:#10B981;--cy:#22D3EE;--text:#e6edf3;--muted:#8392a0;--bad:#fb7185;
+  --glass:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.02));--edge:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;font-weight:600}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:8px}
+button{font:inherit;color:inherit}
+
+.stage{position:fixed;inset:0;z-index:-1;overflow:hidden;perspective:800px}
+.aurora{position:absolute;inset:-20%;filter:blur(80px);animation:drift 30s ease-in-out infinite alternate;
+  background:radial-gradient(circle at 18% 12%,rgba(15,118,110,.38),transparent 38%),radial-gradient(circle at 82% 18%,rgba(16,185,129,.22),transparent 36%),radial-gradient(circle at 50% 95%,rgba(34,211,238,.2),transparent 42%)}
+@keyframes drift{to{transform:translate(-30px,25px) rotate(6deg) scale(1.06)}}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:70%;transform:rotateX(68deg);transform-origin:bottom;
+  background-image:linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.13) 1px,transparent 1px);background-size:64px 64px;animation:fm 6s linear infinite;
+  -webkit-mask-image:linear-gradient(to top,#000,transparent 85%);mask-image:linear-gradient(to top,#000,transparent 85%)}
+@keyframes fm{to{background-position:0 64px}}
+.orb{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.55),rgba(34,211,238,.35) 25%,rgba(15,118,110,.55) 60%,rgba(4,20,24,.9));box-shadow:0 30px 80px -20px rgba(16,185,129,.5),inset -12px -16px 30px rgba(0,0,0,.45);opacity:.8}
+.o1{width:80px;height:80px;top:18%;left:5%;animation:fl 9s ease-in-out infinite}
+.o2{width:44px;height:44px;top:64%;right:6%;animation:fl 7s ease-in-out infinite -2s}
+@keyframes fl{50%{transform:translateY(-24px) translateX(10px)}}
+
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:22px;backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.03),0 30px 60px -30px rgba(0,0,0,.85)}
+.top{position:fixed;top:10px;left:50%;transform:translateX(-50%);width:min(1120px,calc(100% - 20px));z-index:60;border-radius:18px;background:rgba(6,12,18,.7)}
+.scene{perspective:1400px}.tilt{transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.z2{transform:translateZ(60px)}.z3{transform:translateZ(90px)}
+
+.btn{position:relative;overflow:hidden;white-space:nowrap;border-radius:12px;font-weight:500;font-size:13.5px;padding:11px 18px;display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;border:0;isolation:isolate;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s,border-color .3s,opacity .3s}
+.btn::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);transform:skewX(-20deg);transition:left .6s;z-index:-1}
+.btn:hover::after{left:130%}
+.btn-p{color:#fff;background:linear-gradient(135deg,#0F766E,#10B981);box-shadow:0 10px 26px -10px rgba(16,185,129,.85),inset 0 1px 0 rgba(255,255,255,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 16px 32px -10px rgba(34,211,238,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-g{color:#a5f3fc;background:rgba(255,255,255,.05);border:1px solid rgba(34,211,238,.28)}
+.btn-g:hover{background:rgba(34,211,238,.12);border-color:var(--cy);transform:translateY(-2px)}
+.btn-w{color:#1f2937;background:#fff;font-weight:600;box-shadow:0 10px 26px -12px rgba(255,255,255,.35)}
+.btn-w:hover{transform:translateY(-2px);box-shadow:0 16px 30px -12px rgba(255,255,255,.45)}.btn-w::after{display:none}
+.btn:active{transform:scale(.96)}.btn:disabled{opacity:.6;cursor:not-allowed;pointer-events:none}
+.rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:rp .6s ease-out forwards;pointer-events:none}
+.btn-g .rp{background:rgba(34,211,238,.35)}.btn-w .rp{background:rgba(15,23,42,.18)}
+@keyframes rp{to{transform:scale(1);opacity:0}}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .7s linear infinite;display:none}
+.btn-w .spin{border-color:rgba(15,23,42,.2);border-top-color:#1f2937}
+.loading .spin{display:inline-block}.loading .ic{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.grad{background:linear-gradient(120deg,#fff 0%,#67e8f9 45%,#10B981 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gs 7s ease infinite}
+@keyframes gs{to{background-position:200% 50%}}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#a5f3fc;padding:6px 14px;border-radius:999px;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.22)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--em);box-shadow:0 0 8px var(--em);flex-shrink:0}
+.ico{width:42px;height:42px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(145deg,rgba(34,211,238,.22),rgba(16,185,129,.08));border:1px solid rgba(34,211,238,.25);box-shadow:0 10px 24px -10px rgba(34,211,238,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+
+/* Form */
+.lbl{display:block;font-size:13px;font-weight:500;color:#cbd5e1;margin-bottom:7px}
+.inp{width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--edge);color:#fff;font-size:16px;outline:0;transition:border-color .25s,box-shadow .25s,background .25s}
+.inp::placeholder{color:#64748b}
+.inp:focus{border-color:var(--cy);box-shadow:0 0 0 4px rgba(34,211,238,.12);background:rgba(255,255,255,.08)}
+.inp[aria-invalid=true]{border-color:var(--bad);box-shadow:0 0 0 4px rgba(251,113,133,.12)}
+.err{font-size:12px;color:#fda4af;margin-top:6px}.err:empty{display:none}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:10px;border:0;background:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s}
+.eye:hover{color:#a5f3fc;background:rgba(255,255,255,.06)}
+.segs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:10px}
+.segs i{height:4px;border-radius:2px;background:rgba(255,255,255,.1);transition:background .35s}
+.rq{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);transition:color .3s}
+.rq b{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;font-size:9px;transition:all .3s}
+.rq.ok{color:#6ee7b7}.rq.ok b{background:var(--em);border-color:var(--em);color:#04130d}
+.cb{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:6px;flex-shrink:0;margin-top:1px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.05);cursor:pointer;display:grid;place-items:center;transition:all .25s}
+.cb::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) scale(0);margin-top:-2px;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.cb:checked{background:linear-gradient(135deg,#0F766E,#10B981);border-color:transparent}.cb:checked::after{transform:rotate(-45deg) scale(1)}
+.cb[aria-invalid=true]{border-color:var(--bad)}
+.alert{border-radius:12px;padding:11px 14px;font-size:13px;line-height:1.5;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.35);color:#fecdd3;animation:pop .35s}
+.alert:empty{display:none}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.or{display:flex;align-items:center;gap:12px;font-size:12px;color:#64748b}.or::before,.or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+.shake{animation:shk .4s}@keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.view{animation:vin .55s cubic-bezier(.2,.8,.2,1)}@keyframes vin{from{opacity:0;transform:translateY(16px)}}
+.chk path{stroke-dasharray:40;stroke-dashoffset:40;animation:dr .6s .25s ease forwards}@keyframes dr{to{stroke-dashoffset:0}}
+.msg{font-size:12.5px;padding:9px 13px;border-radius:14px;line-height:1.5;width:fit-content;max-width:90%}
+.in{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px;color:#d1dbe3}
+.out{background:linear-gradient(135deg,#0F766E,#10B981);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.ai{background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.28);color:#cffafe;border-bottom-left-radius:4px}
+/* Toasts */
+.toasts{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(400px,calc(100% - 24px));z-index:100;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{pointer-events:auto;position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:12px;padding:13px 14px 15px;border-radius:16px;background:rgba(8,16,22,.86);border:1px solid var(--edge);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);box-shadow:0 20px 40px -16px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.14);animation:tin .5s cubic-bezier(.2,1.2,.3,1) both}
+.toast.out{animation:tout .35s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateY(-26px) scale(.95)}}
+@keyframes tout{to{opacity:0;transform:translateY(-16px) scale(.96)}}
+.toast .ti{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#04130d;background:var(--c);box-shadow:0 6px 16px -6px var(--c)}
+.toast b{display:block;font-size:13.5px;font-weight:600;color:#fff}.toast .m{display:block;font-size:12.5px;color:#aab7c4;line-height:1.45;margin-top:2px;word-break:break-word}
+.toast .x{margin-left:auto;background:none;border:0;color:#7b8894;cursor:pointer;font-size:20px;line-height:1;padding:0 2px;transition:color .2s}.toast .x:hover{color:#fff}
+.toast .bar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--c);transform-origin:left;animation:tbar var(--d) linear forwards}
+@keyframes tbar{to{transform:scaleX(0)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="stage"><div class="aurora"></div><div class="floor"></div><div class="orb o1"></div><div class="orb o2"></div></div>
+
+<nav class="top glass">
+  <div class="px-3 sm:px-5 h-[56px] flex items-center justify-between gap-2">
+    <a href="index.html" class="flex items-center gap-2.5 min-w-0" aria-label="Chatora home">
+      <img src="chatora-logo.png" alt="" class="w-8 h-8 object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-400 items-center justify-center font-bold text-white text-sm">C</div>
+      <span class="brand text-[15px] font-bold text-white">Chatora</span>
+    </a>
+    <div class="flex items-center gap-2"><span class="hidden sm:inline text-[13px] text-gray-400">Already have an account?</span><a href="login.html" class="btn btn-g" style="padding:9px 16px">Log in</a></div>
+  </div>
+</nav>
+
+<main class="min-h-screen px-4 sm:px-8 pt-24 pb-12 flex items-center">
+  <div class="max-w-6xl mx-auto w-full grid lg:grid-cols-[1fr_480px] gap-14 items-center">
+
+    <!-- Left: what you get -->
+    <section class="hidden lg:block scene">
+      <div class="tilt" id="tiltL">
+        <span class="chip mb-6"><span class="dot"></span>Free to join</span>
+        <h1 class="text-[54px] leading-[1.05] font-bold mb-5">Join the<br>conversation <span class="grad">that thinks.</span></h1>
+        <p class="text-gray-400 text-[16px] leading-relaxed max-w-md mb-9">Create an account to message friends, send voice notes and let AI summarize and translate your chats.</p>
+        <div class="space-y-4 mb-10 max-w-md">
+          <div class="flex items-center gap-4"><div class="ico">✨</div><div><div class="font-medium text-white text-[15px]">AI chat summaries</div><div class="text-[13px] text-gray-400">Catch up on 200 messages in seconds.</div></div></div>
+          <div class="flex items-center gap-4"><div class="ico">🌍</div><div><div class="font-medium text-white text-[15px]">Translation in your language</div><div class="text-[13px] text-gray-400">English, Pidgin, Yoruba, Hausa, Igbo and more.</div></div></div>
+          <div class="flex items-center gap-4"><div class="ico">🎙️</div><div><div class="font-medium text-white text-[15px]">Voice messages</div><div class="text-[13px] text-gray-400">Hold to record, release to send.</div></div></div>
+        </div>
+        <div class="glass z3 p-4 max-w-xs flex flex-col gap-2.5">
+          <div class="msg in">Welcome to Chatora! 👋</div>
+          <div class="msg ai"><b>✨ AI tip</b><br>Tap summarize after any long chat.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: form -->
+    <section class="glass p-6 sm:p-9 w-full max-w-[480px] mx-auto lg:mx-0" id="card">
+
+      <div id="formView">
+        <h2 class="text-[28px] mb-1.5">Create your account</h2>
+        <p class="text-gray-400 text-[14px] mb-6">Free, and it takes less than a minute.</p>
+
+        <button type="button" class="btn btn-w w-full" id="gBtn">
+          <svg class="ic" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+          <span class="spin"></span><span id="gTxt">Continue with Google</span>
+        </button>
+
+        <div class="or my-5">or sign up with email</div>
+
+        <form id="form" novalidate class="space-y-4">
+          <div>
+            <label class="lbl" for="name">Full name</label>
+            <input class="inp" id="name" type="text" autocomplete="name" placeholder="Ada Nwosu" maxlength="60" required>
+            <div class="err" id="e-name" role="alert"></div>
+          </div>
+          <div>
+            <label class="lbl" for="email">Email address</label>
+            <input class="inp" id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="120" required>
+            <div class="err" id="e-email" role="alert"></div>
+          </div>
+          <div>
+            <label class="lbl" for="pw">Password</label>
+            <div class="relative">
+              <input class="inp" id="pw" type="password" autocomplete="new-password" placeholder="Create a password" style="padding-right:52px" maxlength="128" required>
+              <button type="button" class="eye" data-for="pw" aria-label="Show password" aria-pressed="false"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="e1" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle class="e1" cx="12" cy="12" r="3"/><path class="e2" style="display:none" d="M3 3l18 18M10.6 6.1A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.6 6.7A17 17 0 0 0 2 12s3.6 6 10 6a9.7 9.7 0 0 0 4-.9"/></svg></button>
+            </div>
+            <div class="segs" id="segs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="flex items-center justify-between mt-2"><span class="text-[12px] text-gray-500" id="sLbl">Password strength</span><span class="text-[12px] text-amber-300 hidden" id="caps">Caps Lock is on</span></div>
+            <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2.5">
+              <div class="rq" id="r1"><b>✓</b>8+ characters</div>
+              <div class="rq" id="r2"><b>✓</b>Upper and lower case</div>
+              <div class="rq" id="r3"><b>✓</b>At least one number</div>
+            </div>
+            <div class="err" id="e-pw" role="alert"></div>
+          </div>
+          <div>
+            <label class="lbl" for="cf">Confirm password</label>
+            <div class="relative">
+              <input class="inp" id="cf" type="password" autocomplete="new-password" placeholder="Repeat your password" style="padding-right:52px" maxlength="128" required>
+              <button type="button" class="eye" data-for="cf" aria-label="Show password" aria-pressed="false"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="e1" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle class="e1" cx="12" cy="12" r="3"/><path class="e2" style="display:none" d="M3 3l18 18M10.6 6.1A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.6 6.7A17 17 0 0 0 2 12s3.6 6 10 6a9.7 9.7 0 0 0 4-.9"/></svg></button>
+            </div>
+            <div class="err" id="e-cf" role="alert"></div>
+          </div>
+          <div>
+            <label class="flex items-start gap-3 text-[13px] text-gray-400 leading-relaxed cursor-pointer">
+              <input class="cb" type="checkbox" id="terms">
+              <span>I agree to the <a href="terms.html" target="_blank" rel="noopener" class="text-cyan-300 hover:underline">Terms of Service</a> and <a href="privacy.html" target="_blank" rel="noopener" class="text-cyan-300 hover:underline">Privacy Policy</a>.</span>
+            </label>
+            <div class="err" id="e-terms" role="alert"></div>
+          </div>
+          <button type="submit" class="btn btn-p w-full" id="sBtn" style="padding:13px 18px"><span class="spin"></span><span id="sTxt">Create account</span></button>
+        </form>
+        <p class="text-center text-[13.5px] text-gray-400 mt-6">Already have an account? <a href="login.html" class="text-cyan-300 font-medium hover:underline">Log in</a></p>
+      </div>
+
+      <!-- Success -->
+      <div id="okView" class="hidden text-center py-4">
+        <div class="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6" style="background:radial-gradient(circle at 30% 25%,#67e8f9,#10B981 55%,#0F766E);box-shadow:0 20px 40px -12px rgba(16,185,129,.8),inset 0 2px 6px rgba(255,255,255,.5)">
+          <svg class="chk" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+        <h2 class="text-[28px] mb-2">Check your inbox</h2>
+        <p class="text-gray-400 text-[14.5px] leading-relaxed mb-1">We sent a verification link to</p>
+        <p class="text-white font-medium mb-5 break-all" id="okMail"></p>
+        <p class="text-gray-500 text-[13px] mb-7">Open the link to verify your email. If you can’t find it, check your spam folder.</p>
+        <a href="chat.html" class="btn btn-p w-full mb-3" style="padding:13px 18px" id="goBtn">Continue to Chatora</a>
+        <button type="button" class="btn btn-g w-full" id="resend">Resend verification email</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {getAuth,createUserWithEmailAndPassword,updateProfile,sendEmailVerification,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,getAdditionalUserInfo,onAuthStateChanged}
+  from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {getFirestore,doc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+/* ====== Firebase config (project: chatora-c309f) ====== */
+const firebaseConfig={
+  apiKey:"AIzaSyDLVQaV9gmlNFDkQLtTytl71F_aJk15xXg",
+  authDomain:"chatora-c309f.firebaseapp.com",
+  projectId:"chatora-c309f",
+  storageBucket:"chatora-c309f.firebasestorage.app",
+  messagingSenderId:"619677340839",
+  appId:"1:619677340839:web:795c3fd79d87c8d05db782"
+};
+const NEXT='chat.html';   /* where signed-in users go. chat.html must check auth itself. */
+
+const configured=!String(firebaseConfig.apiKey).startsWith('YOUR_');
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+let lock=sessionStorage.getItem('gRedirect')==='1';   /* true while a sign-up is in progress, so we never redirect early */
+
+/* ---------- 3D tilt + ripple ---------- */
+if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  const t=$('tiltL');addEventListener('mousemove',e=>{t.style.transform=`rotateY(${(e.clientX/innerWidth-.5)*10}deg) rotateX(${-(e.clientY/innerHeight-.5)*8}deg)`})}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('.btn');if(!b||b.disabled)return;
+  const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,s=document.createElement('span');s.className='rp';
+  s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;b.appendChild(s);setTimeout(()=>s.remove(),650)});
+document.addEventListener('click',e=>{const a=e.target.closest('a.btn');
+  if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button!==0||a.target==='_blank')return;e.preventDefault();setTimeout(()=>location.href=a.href,240)});
+
+/* ---------- field helpers ---------- */
+const F={name:$('name'),email:$('email'),pw:$('pw'),cf:$('cf'),terms:$('terms')};
+function setErr(k,m){$('e-'+k).textContent=m||'';F[k].setAttribute('aria-invalid',m?'true':'false')}
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const pwRules=v=>[v.length>=8,/[a-z]/.test(v)&&/[A-Z]/.test(v),/\d/.test(v)];
+const check={
+  name:()=>F.name.value.trim().length<2?'Enter your full name.':'',
+  email:()=>!EMAIL.test(F.email.value.trim())?'Enter a valid email address.':'',
+  pw:()=>pwRules(F.pw.value).every(Boolean)?'':'Use 8+ characters with upper and lower case letters and a number.',
+  cf:()=>F.cf.value!==F.pw.value?'Passwords do not match.':'',
+  terms:()=>F.terms.checked?'':'Please accept the terms to continue.'};
+['name','email','pw','cf'].forEach(k=>{F[k].addEventListener('blur',()=>{if(F[k].value||F[k].getAttribute('aria-invalid')==='true')setErr(k,check[k]())});
+  F[k].addEventListener('input',()=>{if(F[k].getAttribute('aria-invalid')==='true')setErr(k,check[k]())})});
+F.terms.addEventListener('change',()=>{if(F.terms.checked)setErr('terms','')});
+F.pw.addEventListener('input',()=>{strength();if(F.cf.value)setErr('cf',check.cf())});
+
+/* ---------- password strength, show/hide, caps lock ---------- */
+const cols=['#fb7185','#fbbf24','#34d399','#22D3EE'],names=['Too weak','Fair','Good','Strong'];
+function strength(){const v=F.pw.value,r=pwRules(v);r.forEach((ok,i)=>$('r'+(i+1)).classList.toggle('ok',ok));
+  let s=r.filter(Boolean).length+(/[^A-Za-z0-9]/.test(v)&&v.length>=8?1:0);if(!v)s=0;s=Math.min(4,s);
+  [...$('segs').children].forEach((b,i)=>b.style.background=i<s?cols[s-1]:'');
+  $('sLbl').textContent=v?`${names[Math.max(0,s-1)]}`:'Password strength'}
+document.querySelectorAll('.eye').forEach(b=>b.onclick=()=>{const i=$(b.dataset.for),show=i.type==='password';i.type=show?'text':'password';
+  b.setAttribute('aria-pressed',show);b.setAttribute('aria-label',show?'Hide password':'Show password');
+  b.querySelectorAll('.e1').forEach(x=>x.style.display=show?'none':'');b.querySelector('.e2').style.display=show?'':'none'});
+['pw','cf'].forEach(k=>{F[k].addEventListener('keyup',e=>{if(e.getModifierState)$('caps').classList.toggle('hidden',!e.getModifierState('CapsLock'))});F[k].addEventListener('blur',()=>$('caps').classList.add('hidden'))});
+
+/* ---------- messages and loading ---------- */
+const ERR={'auth/email-already-in-use':'An account with this email already exists. Try logging in instead.','auth/invalid-email':'That email address looks invalid.',
+ 'auth/weak-password':'Choose a stronger password.','auth/network-request-failed':'Network problem. Check your connection and try again.',
+ 'auth/too-many-requests':'Too many attempts. Please wait a moment and try again.','auth/account-exists-with-different-credential':'This email is already registered with a different sign-in method. Log in with your email and password.',
+ 'auth/operation-not-allowed':'This sign-in method is not enabled yet. Enable it in Firebase Authentication.','auth/unauthorized-domain':'This domain is not authorized. Add it under Firebase Authentication > Settings > Authorized domains.',
+ 'auth/user-disabled':'This account has been disabled.'};
+const msg=e=>ERR[e&&e.code]||'Something went wrong. Please try again.';
+const TI={success:'✓',error:'✕',warn:'!',info:'i'},TC={success:'#10B981',error:'#fb7185',warn:'#f59e0b',info:'#22D3EE'};
+function toast(type,title,text='',ms=4800){const box=$('toasts');while(box.children.length>=3)box.firstChild.remove();
+  const t=document.createElement('div');t.className='toast';t.setAttribute('role',type==='error'?'alert':'status');t.style.cssText=`--c:${TC[type]};--d:${ms}ms`;
+  t.innerHTML='<div class="ti"></div><div class="min-w-0"><b></b><span class="m"></span></div><button class="x" aria-label="Dismiss">×</button><i class="bar"></i>';
+  t.querySelector('.ti').textContent=TI[type];t.querySelector('b').textContent=title;t.querySelector('.m').textContent=text;
+  const close=()=>{if(t.classList.contains('out'))return;t.classList.add('out');setTimeout(()=>t.remove(),350)};
+  t.querySelector('.x').onclick=close;box.appendChild(t);setTimeout(close,ms)}
+const showAlert=m=>{if(m)toast('error','Couldn’t continue',m)};
+function loading(btn,txtEl,on,label){btn.disabled=on;btn.classList.toggle('loading',on);if(label)txtEl.textContent=label}
+function setBusy(on,who){
+  loading($('sBtn'),$('sTxt'),on&&who==='email',on&&who==='email'?'Creating account...':'Create account');
+  loading($('gBtn'),$('gTxt'),on&&who==='google',on&&who==='google'?'Connecting...':'Continue with Google');
+  $('gBtn').disabled=on;$('sBtn').disabled=on}
+function needConfig(){if(configured)return false;toast('warn','Firebase not connected','Add your Firebase config at the top of the script in signup.html.');return true}
+
+/* ---------- profile document (Firestore: users/{uid}) ---------- */
+async function saveProfile(u,name,provider){
+  try{await setDoc(doc(db,'users',u.uid),{uid:u.uid,name:name||u.displayName||'',email:u.email||'',photoURL:u.photoURL||null,provider,createdAt:serverTimestamp()},{merge:true})}
+  catch(err){console.warn('Profile not saved. Check your Firestore rules.',err)}}
+
+/* ---------- email + password sign up ---------- */
+$('form').addEventListener('submit',async e=>{e.preventDefault();showAlert('');
+  const bad=['name','email','pw','cf','terms'].filter(k=>{const m=check[k]();setErr(k,m);return m});
+  if(bad.length){toast('warn','Check your details','Fix the highlighted fields to continue.');F[bad[0]].focus();$('card').classList.remove('shake');void $('card').offsetWidth;$('card').classList.add('shake');return}
+  if(needConfig())return;
+  lock=true;setBusy(true,'email');
+  try{const name=F.name.value.trim(),email=F.email.value.trim();
+    const c=await createUserWithEmailAndPassword(auth,email,F.pw.value);
+    await updateProfile(c.user,{displayName:name});await saveProfile(c.user,name,'password');
+    try{await sendEmailVerification(c.user)}catch(x){console.warn(x)}
+    toast('success','Account created','Verification link sent to '+email+'.');$('okMail').textContent=email;$('formView').classList.add('hidden');const o=$('okView');o.classList.remove('hidden');o.classList.add('view');cooldown()}
+  catch(err){lock=false;setBusy(false);
+    if(err.code==='auth/email-already-in-use'){setErr('email','This email is already registered.')}
+    showAlert(msg(err))}});
+
+/* ---------- Google ---------- */
+const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
+async function afterGoogle(r){const info=getAdditionalUserInfo(r),n=!!(info&&info.isNewUser);if(n)await saveProfile(r.user,r.user.displayName,'google');
+  toast('success',n?'Welcome to Chatora':'Welcome back',r.user.displayName||r.user.email||'');setTimeout(()=>location.replace(NEXT),1000)}
+$('gBtn').addEventListener('click',async()=>{showAlert('');if(needConfig())return;
+  lock=true;setBusy(true,'google');
+  try{await afterGoogle(await signInWithPopup(auth,provider))}
+  catch(err){
+    if(err.code==='auth/popup-blocked'||err.code==='auth/operation-not-supported-in-this-environment'){sessionStorage.setItem('gRedirect','1');return signInWithRedirect(auth,provider)}
+    lock=false;setBusy(false);
+    if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request'){toast('info','Sign-in cancelled','The Google window was closed.');return}
+    showAlert(msg(err))}});
+if(configured)getRedirectResult(auth).then(r=>{sessionStorage.removeItem('gRedirect');if(r)return afterGoogle(r);lock=false})
+  .catch(err=>{sessionStorage.removeItem('gRedirect');lock=false;showAlert(msg(err))});
+
+/* ---------- resend verification ---------- */
+let cd=0,tm;
+function cooldown(s=30){cd=s;const b=$('resend');b.disabled=true;clearInterval(tm);
+  tm=setInterval(()=>{cd--;if(cd<=0){clearInterval(tm);b.disabled=false;b.textContent='Resend verification email'}else b.textContent=`Resend in ${cd}s`},1000);b.textContent=`Resend in ${cd}s`}
+$('resend').addEventListener('click',async()=>{
+  try{await sendEmailVerification(auth.currentUser);cooldown();toast('success','Email sent','We sent the verification link again.')}
+  catch(err){toast('error','Couldn’t resend',msg(err))}});
+
+/* ---------- already signed in? skip this page ---------- */
+onAuthStateChanged(auth,u=>{if(u&&!lock)location.replace(NEXT)});
+</script>
+</body>
+</html>
