@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" class="guarding">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Set up your profile | Chatora</title>
+<link rel="icon" type="image/png" href="chatora-logo.png" />
+<style>html.guarding body{visibility:hidden}</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#03060a;--teal:#0F766E;--em:#10B981;--cy:#22D3EE;--text:#e6edf3;--muted:#8392a0;--bad:#fb7185;
+  --glass:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.02));--edge:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;font-weight:600}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:8px}
+button{font:inherit;color:inherit}
+
+.stage{position:fixed;inset:0;z-index:-1;overflow:hidden;perspective:800px}
+.aurora{position:absolute;inset:-20%;filter:blur(80px);animation:drift 30s ease-in-out infinite alternate;
+  background:radial-gradient(circle at 18% 12%,rgba(15,118,110,.38),transparent 38%),radial-gradient(circle at 82% 18%,rgba(16,185,129,.22),transparent 36%),radial-gradient(circle at 50% 95%,rgba(34,211,238,.2),transparent 42%)}
+@keyframes drift{to{transform:translate(-30px,25px) rotate(6deg) scale(1.06)}}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:70%;transform:rotateX(68deg);transform-origin:bottom;
+  background-image:linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.13) 1px,transparent 1px);background-size:64px 64px;animation:fm 6s linear infinite;
+  -webkit-mask-image:linear-gradient(to top,#000,transparent 85%);mask-image:linear-gradient(to top,#000,transparent 85%)}
+@keyframes fm{to{background-position:0 64px}}
+.orb{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.55),rgba(34,211,238,.35) 25%,rgba(15,118,110,.55) 60%,rgba(4,20,24,.9));box-shadow:0 30px 80px -20px rgba(16,185,129,.5),inset -12px -16px 30px rgba(0,0,0,.45);opacity:.8}
+.o1{width:80px;height:80px;top:18%;left:5%;animation:fl 9s ease-in-out infinite}
+.o2{width:44px;height:44px;top:64%;right:6%;animation:fl 7s ease-in-out infinite -2s}
+@keyframes fl{50%{transform:translateY(-24px) translateX(10px)}}
+
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:22px;backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.03),0 30px 60px -30px rgba(0,0,0,.85)}
+.top{position:fixed;top:10px;left:50%;transform:translateX(-50%);width:min(1120px,calc(100% - 20px));z-index:60;border-radius:18px;background:rgba(6,12,18,.7)}
+
+.btn{position:relative;overflow:hidden;white-space:nowrap;border-radius:12px;font-weight:500;font-size:13.5px;padding:12px 18px;display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;border:0;isolation:isolate;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s,border-color .3s,opacity .3s}
+.btn::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);transform:skewX(-20deg);transition:left .6s;z-index:-1}
+.btn:hover::after{left:130%}
+.btn-p{color:#fff;background:linear-gradient(135deg,#0F766E,#10B981);box-shadow:0 10px 26px -10px rgba(16,185,129,.85),inset 0 1px 0 rgba(255,255,255,.28)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 16px 32px -10px rgba(34,211,238,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-g{color:#a5f3fc;background:rgba(255,255,255,.05);border:1px solid rgba(34,211,238,.28)}
+.btn-g:hover{background:rgba(34,211,238,.12);border-color:var(--cy);transform:translateY(-2px)}
+.btn:active{transform:scale(.96)}.btn:disabled{opacity:.6;cursor:not-allowed;pointer-events:none}
+.rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:rp .6s ease-out forwards;pointer-events:none}
+.btn-g .rp{background:rgba(34,211,238,.35)}
+@keyframes rp{to{transform:scale(1);opacity:0}}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .7s linear infinite;display:none}
+.loading .spin{display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.grad{background:linear-gradient(120deg,#fff 0%,#67e8f9 45%,#10B981 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gs 7s ease infinite}
+@keyframes gs{to{background-position:200% 50%}}
+
+.lbl{display:block;font-size:13px;font-weight:500;color:#cbd5e1;margin-bottom:7px}
+.inp{width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--edge);color:#fff;font-size:16px;outline:0;transition:border-color .25s,box-shadow .25s,background .25s}
+.inp::placeholder{color:#64748b}
+.inp:focus{border-color:var(--cy);box-shadow:0 0 0 4px rgba(34,211,238,.12);background:rgba(255,255,255,.08)}
+.inp[aria-invalid=true]{border-color:var(--bad);box-shadow:0 0 0 4px rgba(251,113,133,.12)}
+.err{font-size:12px;color:#fda4af;margin-top:6px}.err:empty{display:none}
+.hint{font-size:12px;margin-top:6px;color:var(--muted);min-height:16px}.hint.ok{color:#6ee7b7}.hint.bad{color:#fda4af}
+.cp{padding:7px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;color:#cbd5e1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);transition:all .25s;white-space:nowrap}
+.cp:hover{border-color:var(--cy);color:#fff}.cp:active{transform:scale(.93)}
+.cp[aria-pressed=true]{background:linear-gradient(135deg,#0F766E,#10B981);color:#fff;border-color:transparent;box-shadow:0 8px 20px -8px rgba(16,185,129,.8)}
+.lnk{background:none;border:0;cursor:pointer;color:#67e8f9;font-size:13px;font-weight:500}.lnk:hover{text-decoration:underline}
+
+/* Avatar */
+.av{position:relative;width:116px;height:116px;border-radius:50%;border:0;padding:0;cursor:pointer;display:block;transition:transform .3s,box-shadow .3s}
+.av:hover{transform:scale(1.04)}.av:active{transform:scale(.96)}
+.av.drag{box-shadow:0 0 0 4px rgba(34,211,238,.5)}
+.avimg{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.25);box-shadow:0 20px 44px -14px rgba(16,185,129,.7)}
+.avph{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:600;color:#fff;border:2px solid rgba(255,255,255,.25);background:radial-gradient(circle at 30% 25%,#67e8f9,#10B981 55%,#0F766E);box-shadow:0 20px 44px -14px rgba(16,185,129,.7)}
+.cam{position:absolute;right:-2px;bottom:2px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#0F766E;box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+
+/* Language combobox */
+.langlist{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:30;list-style:none;max-height:264px;overflow-y:auto;padding:6px;border-radius:16px;background:rgba(7,14,20,.97);border:1px solid rgba(34,211,238,.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 24px 50px -16px rgba(0,0,0,.9);
+  opacity:0;visibility:hidden;transform:translateY(-8px) scale(.97);transform-origin:top;pointer-events:none;transition:opacity .22s,transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s linear .3s;overscroll-behavior:contain}
+.langlist.open{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition-delay:0s}
+.langlist li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px}
+.langlist li small{color:var(--muted);font-size:12.5px}
+.langlist li[aria-selected=true]{background:rgba(16,185,129,.14)}.langlist li.act{background:rgba(34,211,238,.14)}
+.langlist .none{padding:14px;text-align:center;color:var(--muted);font-size:13px;cursor:default}
+.clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;border:0;background:rgba(255,255,255,.06);color:#cbd5e1;font-size:18px;line-height:1;cursor:pointer}
+.clr:hover{background:rgba(255,255,255,.12)}
+.shake{animation:shk .4s}@keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.toasts{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(400px,calc(100% - 24px));z-index:100;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{pointer-events:auto;position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:12px;padding:13px 14px 15px;border-radius:16px;background:rgba(8,16,22,.86);border:1px solid var(--edge);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);box-shadow:0 20px 40px -16px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.14);animation:tin .5s cubic-bezier(.2,1.2,.3,1) both}
+.toast.out{animation:tout .35s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateY(-26px) scale(.95)}}
+@keyframes tout{to{opacity:0;transform:translateY(-16px) scale(.96)}}
+.toast .ti{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#04130d;background:var(--c);box-shadow:0 6px 16px -6px var(--c)}
+.toast b{display:block;font-size:13.5px;font-weight:600;color:#fff}.toast .m{display:block;font-size:12.5px;color:#aab7c4;line-height:1.45;margin-top:2px;word-break:break-word}
+.toast .x{margin-left:auto;background:none;border:0;color:#7b8894;cursor:pointer;font-size:20px;line-height:1;padding:0 2px;transition:color .2s}.toast .x:hover{color:#fff}
+.toast .bar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--c);transform-origin:left;animation:tbar var(--d) linear forwards}
+@keyframes tbar{to{transform:scaleX(0)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="stage"><div class="aurora"></div><div class="floor"></div><div class="orb o1"></div><div class="orb o2"></div></div>
+
+<nav class="top glass">
+  <div class="px-3 sm:px-5 h-[56px] flex items-center justify-between gap-2">
+    <a href="index.html" class="flex items-center gap-2.5 min-w-0" aria-label="Chatora home">
+      <img src="chatora-logo.png" alt="" class="w-8 h-8 object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="hidden w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-400 items-center justify-center font-bold text-white text-sm">C</div>
+      <span class="brand text-[15px] font-bold text-white">Chatora</span>
+    </a>
+    <button type="button" class="btn btn-g" id="logoutTop" style="padding:9px 16px">Log out</button>
+  </div>
+</nav>
+
+<main class="min-h-screen px-4 sm:px-8 pt-24 pb-16 flex items-start sm:items-center justify-center">
+  <section class="glass w-full max-w-[540px] p-6 sm:p-9" id="card">
+    <h1 class="text-[30px] sm:text-[34px] mb-1.5 text-center">Set up your <span class="grad">profile</span></h1>
+    <p class="text-gray-400 text-[14.5px] text-center mb-8">Add a photo, pick a username and choose the language you want to read in.</p>
+
+    <form id="form" novalidate class="space-y-6">
+      <!-- Photo -->
+      <div class="flex flex-col items-center">
+        <button type="button" class="av" id="av" aria-label="Upload profile photo">
+          <span id="avBox" class="block w-full h-full"></span>
+          <span class="cam"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+        </button>
+        <input type="file" id="file" accept="image/*" class="hidden">
+        <div class="flex items-center gap-4 mt-4">
+          <button type="button" class="lnk" id="pick">Upload photo</button>
+          <button type="button" class="lnk hidden" id="rm" style="color:#fda4af">Remove</button>
+        </div>
+        <p class="text-[12px] text-gray-500 mt-1" id="photoNote">Optional. JPG or PNG, any size.</p>
+      </div>
+
+      <!-- Name -->
+      <div>
+        <label class="lbl" for="name">Display name</label>
+        <input class="inp" id="name" type="text" autocomplete="name" maxlength="60" placeholder="Ada Nwosu">
+        <div class="err" id="e-name" role="alert"></div>
+      </div>
+
+      <!-- Username -->
+      <div>
+        <label class="lbl" for="uname">Username</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">@</span>
+          <input class="inp" id="uname" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="ada_nwosu" style="padding-left:34px">
+        </div>
+        <div class="hint" id="uhint" aria-live="polite">3 to 20 characters: letters, numbers and underscores.</div>
+        <div class="err" id="e-uname" role="alert"></div>
+      </div>
+
+      <!-- Language -->
+      <div class="relative" id="langBox">
+        <label class="lbl" for="lang">Preferred language</label>
+        <div class="relative">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input class="inp" id="lang" type="text" role="combobox" aria-expanded="false" aria-controls="langList" aria-autocomplete="list" autocomplete="off" spellcheck="false" style="padding-left:42px;padding-right:46px">
+          <button type="button" class="clr hidden" id="langClr" aria-label="Clear language">×</button>
+        </div>
+        <ul class="langlist" id="langList" role="listbox" aria-label="Languages"></ul>
+        <div class="err" id="e-lang" role="alert"></div>
+        <div class="flex flex-wrap gap-2 mt-3" id="quick"></div>
+        <p class="text-[12px] text-gray-500 mt-2.5">Messages written in other languages will be translated into this one for you.</p>
+      </div>
+
+      <button type="submit" class="btn btn-p w-full" id="save" style="padding:13px 18px"><span class="spin"></span><span id="saveTxt">Finish setup</span></button>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+import {guard,auth,db,go,logout} from './auth-guard.js';
+import {updateProfile} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {doc,getDoc,getDocFromServer,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+const $=id=>document.getElementById(id);
+
+/* ---------- toasts + ripple ---------- */
+const TI={success:'✓',error:'✕',warn:'!',info:'i'},TC={success:'#10B981',error:'#fb7185',warn:'#f59e0b',info:'#22D3EE'};
+function toast(type,title,text='',ms=4800){const box=$('toasts');while(box.children.length>=3)box.firstChild.remove();
+  const t=document.createElement('div');t.className='toast';t.setAttribute('role',type==='error'?'alert':'status');t.style.cssText=`--c:${TC[type]};--d:${ms}ms`;
+  t.innerHTML='<div class="ti"></div><div class="min-w-0"><b></b><span class="m"></span></div><button class="x" aria-label="Dismiss">×</button><i class="bar"></i>';
+  t.querySelector('.ti').textContent=TI[type];t.querySelector('b').textContent=title;t.querySelector('.m').textContent=text;
+  const close=()=>{if(t.classList.contains('out'))return;t.classList.add('out');setTimeout(()=>t.remove(),350)};
+  t.querySelector('.x').onclick=close;box.appendChild(t);setTimeout(close,ms)}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('.btn');if(!b||b.disabled)return;
+  const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,s=document.createElement('span');s.className='rp';
+  s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;b.appendChild(s);setTimeout(()=>s.remove(),650)});
+
+/* ---------- only verified users get here ---------- */
+const user=await guard({onboarded:false});
+$('logoutTop').onclick=()=>logout('login');
+
+/* ---------- languages (code | English | native) ---------- */
+const LANGS=`en|English|English;pcm|Nigerian Pidgin|Naija;ha|Hausa|Hausa;yo|Yoruba|Yorùbá;ig|Igbo|Igbo;ff|Fulah|Fulfulde;kr|Kanuri|Kanuri;tiv|Tiv|Tiv;efi|Efik|Efik;bin|Edo|Ẹ̀dó;ak|Akan (Twi)|Akan;ee|Ewe|Eʋegbe;wo|Wolof|Wolof;sw|Swahili|Kiswahili;am|Amharic|አማርኛ;om|Oromo|Afaan Oromoo;so|Somali|Soomaali;ti|Tigrinya|ትግርኛ;zu|Zulu|isiZulu;xh|Xhosa|isiXhosa;st|Sesotho|Sesotho;sn|Shona|chiShona;ny|Chichewa|Chichewa;rw|Kinyarwanda|Ikinyarwanda;lg|Luganda|Luganda;ln|Lingala|Lingála;mg|Malagasy|Malagasy;af|Afrikaans|Afrikaans;ar|Arabic|العربية;fr|French|Français;pt|Portuguese|Português;es|Spanish|Español;de|German|Deutsch;it|Italian|Italiano;nl|Dutch|Nederlands;ru|Russian|Русский;uk|Ukrainian|Українська;pl|Polish|Polski;tr|Turkish|Türkçe;fa|Persian|فارسی;ur|Urdu|اردو;hi|Hindi|हिन्दी;bn|Bengali|বাংলা;pa|Punjabi|ਪੰਜਾਬੀ;gu|Gujarati|ગુજરાતી;mr|Marathi|मराठी;ta|Tamil|தமிழ்;te|Telugu|తెలుగు;kn|Kannada|ಕನ್ನಡ;ml|Malayalam|മലയാളം;or|Odia|ଓଡ଼ିଆ;ne|Nepali|नेपाली;si|Sinhala|සිංහල;sd|Sindhi|سنڌي;ps|Pashto|پښتو;ku|Kurdish|Kurdî;he|Hebrew|עברית;yi|Yiddish|ייִדיש;zh-CN|Chinese (Simplified)|简体中文;zh-TW|Chinese (Traditional)|繁體中文;ja|Japanese|日本語;ko|Korean|한국어;vi|Vietnamese|Tiếng Việt;th|Thai|ไทย;id|Indonesian|Bahasa Indonesia;ms|Malay|Bahasa Melayu;tl|Filipino|Filipino;jv|Javanese|Basa Jawa;su|Sundanese|Basa Sunda;ceb|Cebuano|Cebuano;my|Burmese|မြန်မာ;km|Khmer|ខ្មែរ;lo|Lao|ລາວ;mn|Mongolian|Монгол;kk|Kazakh|Қазақша;ky|Kyrgyz|Кыргызча;uz|Uzbek|Oʻzbekcha;tg|Tajik|Тоҷикӣ;az|Azerbaijani|Azərbaycan;hy|Armenian|Հայերեն;ka|Georgian|ქართული;el|Greek|Ελληνικά;bg|Bulgarian|Български;sr|Serbian|Српски;hr|Croatian|Hrvatski;bs|Bosnian|Bosanski;sl|Slovenian|Slovenščina;sk|Slovak|Slovenčina;cs|Czech|Čeština;hu|Hungarian|Magyar;ro|Romanian|Română;mk|Macedonian|Македонски;sq|Albanian|Shqip;be|Belarusian|Беларуская;lt|Lithuanian|Lietuvių;lv|Latvian|Latviešu;et|Estonian|Eesti;fi|Finnish|Suomi;sv|Swedish|Svenska;no|Norwegian|Norsk;da|Danish|Dansk;is|Icelandic|Íslenska;ga|Irish|Gaeilge;cy|Welsh|Cymraeg;ca|Catalan|Català;eu|Basque|Euskara;gl|Galician|Galego;mt|Maltese|Malti;mi|Maori|Te Reo Māori;ht|Haitian Creole|Kreyòl ayisyen`
+ .split(';').map(x=>{const[c,n,v]=x.split('|');return{code:c,name:n,native:v}});
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+LANGS.forEach(l=>l.key=norm(l.name+' '+l.native+' '+l.code));
+const QUICK=['en','pcm','ha','yo','ig'];
+$('lang').placeholder=`Search ${LANGS.length} languages`;
+
+const lang=$('lang'),list=$('langList');
+let sel=null,act=-1,shown=[];
+const label=l=>l?`${l.name}${l.native!==l.name?' · '+l.native:''}`:'';
+function render(q=''){const n=norm(q.trim());
+  shown=!n?LANGS.slice():LANGS.filter(l=>l.key.includes(n)).sort((a,b)=>(norm(b.name).startsWith(n)-norm(a.name).startsWith(n))||(norm(b.native).startsWith(n)-norm(a.native).startsWith(n)));
+  act=shown.findIndex(l=>sel&&l.code===sel.code);if(act<0)act=0;
+  list.innerHTML=shown.length?shown.map((l,i)=>`<li role="option" id="lo${i}" data-i="${i}" aria-selected="${!!sel&&sel.code===l.code}" class="${i===act?'act':''}"><span>${l.name}</span><small>${l.native!==l.name?l.native:''}</small></li>`).join(''):'<li class="none">No language found. Try another spelling.</li>'}
+function openL(q=''){render(q);list.classList.add('open');lang.setAttribute('aria-expanded','true');
+  const a=$('lo'+act);if(a)list.scrollTop=Math.max(0,a.offsetTop-80)}
+function closeL(){list.classList.remove('open');lang.setAttribute('aria-expanded','false');lang.removeAttribute('aria-activedescendant');lang.value=label(sel)}
+function setAct(i){if(!shown.length)return;act=(i+shown.length)%shown.length;
+  list.querySelectorAll('li').forEach((li,k)=>li.classList.toggle('act',k===act));
+  const a=$('lo'+act);if(a){a.scrollIntoView({block:'nearest'});lang.setAttribute('aria-activedescendant','lo'+act)}}
+function choose(l){sel=l;lang.value=label(l);$('langClr').classList.remove('hidden');setErr('lang','');syncQuick();closeL();lang.blur()}
+function syncQuick(){document.querySelectorAll('#quick .cp').forEach(b=>b.setAttribute('aria-pressed',!!sel&&sel.code===b.dataset.c))}
+$('quick').innerHTML=QUICK.map(c=>{const l=LANGS.find(x=>x.code===c);return`<button type="button" class="cp" data-c="${c}" aria-pressed="false">${l.name}</button>`}).join('');
+$('quick').addEventListener('click',e=>{const b=e.target.closest('.cp');if(b)choose(LANGS.find(l=>l.code===b.dataset.c))});
+lang.addEventListener('focus',()=>{lang.select();openL('')});
+lang.addEventListener('input',()=>openL(lang.value));
+lang.addEventListener('blur',()=>setTimeout(closeL,150));
+lang.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){e.preventDefault();if(!list.classList.contains('open'))openL(lang.value);else setAct(act+1)}
+  else if(e.key==='ArrowUp'){e.preventDefault();setAct(act-1)}
+  else if(e.key==='Enter'&&list.classList.contains('open')){e.preventDefault();if(shown[act])choose(shown[act])}
+  else if(e.key==='Escape'){closeL()}});
+list.addEventListener('mousedown',e=>{e.preventDefault();const li=e.target.closest('li[data-i]');if(li)choose(shown[+li.dataset.i])});
+$('langClr').onclick=()=>{sel=null;lang.value='';$('langClr').classList.add('hidden');syncQuick();lang.focus()};
+
+/* ---------- field helpers ---------- */
+const F={name:$('name'),uname:$('uname'),lang};
+function setErr(k,m){const e=$('e-'+k);if(e)e.textContent=m||'';F[k].setAttribute('aria-invalid',m?'true':'false')}
+const UN=/^[a-z][a-z0-9_]{2,19}$/;
+const uHint=(m,c='')=>{const h=$('uhint');h.textContent=m;h.className='hint '+c};
+const shake=()=>{const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')};
+
+/* ---------- photo: crop square, resize, store as base64 ---------- */
+let photo=null,thumb=null,remote=null;   /* photo/thumb = base64 data URLs; remote = existing Google photo URL */
+const initial=()=>((F.name.value||user.displayName||user.email||'?').trim()[0]||'?').toUpperCase();
+function paintAvatar(){const b=$('avBox'),src=photo||remote;
+  b.innerHTML=src?'<img class="avimg" alt="Your profile photo">':`<span class="avph">${initial()}</span>`;
+  if(src){const i=b.firstChild;i.src=src;i.referrerPolicy='no-referrer'}
+  $('rm').classList.toggle('hidden',!photo);
+  $('photoNote').textContent=photo?'Photo ready. It will be saved when you finish.':(remote?'Using your Google photo. Upload one to replace it.':'Optional. JPG or PNG, any size.')}
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();
+  i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('decode'))};i.src=u})}
+function square(img,size,q){const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+  const s=Math.min(img.naturalWidth,img.naturalHeight),sx=(img.naturalWidth-s)/2,sy=(img.naturalHeight-s)/2;
+  x.fillStyle='#0b1a20';x.fillRect(0,0,size,size);x.imageSmoothingQuality='high';x.drawImage(img,sx,sy,s,s,0,0,size,size);return c.toDataURL('image/jpeg',q)}
+async function takeFile(file){
+  if(!file)return;
+  if(!file.type.startsWith('image/')){toast('error','Not an image','Please choose a JPG or PNG photo.');return}
+  if(file.size>15*1024*1024){toast('error','Photo too large','Choose a photo under 15 MB.');return}
+  try{const img=await loadImg(file);let q=.86,p=square(img,320,q);while(p.length>180000&&q>.4){q-=.1;p=square(img,320,q)}
+    photo=p;thumb=square(img,96,.8);paintAvatar();toast('success','Photo ready','Cropped and compressed to '+Math.round(p.length*.75/1024)+' KB.',3200)}
+  catch(e){toast('error','Couldn’t read that photo','Try a JPG or PNG instead (HEIC is not supported in every browser).')}}
+const fileIn=$('file');
+$('av').onclick=$('pick').onclick=()=>fileIn.click();
+fileIn.onchange=()=>{takeFile(fileIn.files[0]);fileIn.value=''};
+$('rm').onclick=()=>{photo=thumb=null;paintAvatar();toast('info','Photo removed')};
+['dragenter','dragover'].forEach(ev=>$('av').addEventListener(ev,e=>{e.preventDefault();$('av').classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>$('av').addEventListener(ev,e=>{e.preventDefault();$('av').classList.remove('drag')}));
+$('av').addEventListener('drop',e=>takeFile(e.dataTransfer.files[0]));
+F.name.addEventListener('input',()=>{if(!photo&&!remote)paintAvatar();if(F.name.getAttribute('aria-invalid')==='true')setErr('name',F.name.value.trim().length<2?'Enter your name.':'')});
+
+/* ---------- username availability ---------- */
+let utimer,ustate='idle',ureq=0;
+F.uname.addEventListener('input',()=>{const v=F.uname.value=F.uname.value.toLowerCase().replace(/[^a-z0-9_]/g,'');setErr('uname','');clearTimeout(utimer);ustate='idle';
+  if(!v){uHint('3 to 20 characters: letters, numbers and underscores.');return}
+  if(!UN.test(v)){uHint(v.length<3?'At least 3 characters.':'Must start with a letter.','bad');ustate='bad';return}
+  uHint('Checking...');ustate='checking';utimer=setTimeout(()=>checkName(v),450)});
+async function checkName(v){const id=++ureq;
+  try{const s=await getDoc(doc(db,'usernames',v));if(id!==ureq)return;
+    if(s.exists()&&s.data().uid!==user.uid){ustate='taken';uHint('@'+v+' is already taken.','bad')}else{ustate='ok';uHint('@'+v+' is available.','ok')}}
+  catch(e){if(id!==ureq)return;ustate='idle';uHint('Couldn’t check right now. We’ll check again when you save.')}}
+
+/* ---------- load any existing profile, then prefill ---------- */
+try{const s=await getDoc(doc(db,'users',user.uid));const d=s.exists()?s.data():{};
+  if(d.onboarded){go('app')}
+  F.name.value=d.name||user.displayName||'';
+  if(d.photo){photo=d.photo;thumb=d.photoThumb||null}else if(user.photoURL)remote=user.photoURL;
+  const pl=d.preferredLanguage&&LANGS.find(l=>l.code===d.preferredLanguage.code);if(pl){sel=pl;lang.value=label(pl);$('langClr').classList.remove('hidden');syncQuick()}
+  let u=d.username||((user.displayName||user.email.split('@')[0]||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20));
+  if(u&&!/^[a-z]/.test(u))u='user'+u;u=u.slice(0,20);
+  if(UN.test(u)){F.uname.value=u;checkName(u);ustate='checking';uHint('Checking...')}
+}catch(e){console.warn('Could not read profile',e);if(user.photoURL)remote=user.photoURL;F.name.value=F.name.value||user.displayName||''}
+paintAvatar();
+
+/* ---------- save ---------- */
+const check={name:()=>F.name.value.trim().length<2?'Enter your name.':'',uname:()=>UN.test(F.uname.value)?'':'Choose a username: 3 to 20 letters, numbers or underscores, starting with a letter.',lang:()=>sel?'':'Choose your preferred language.'};
+function busy(on,t){const b=$('save');b.disabled=on;b.classList.toggle('loading',on);$('saveTxt').textContent=t||'Finish setup'}
+$('form').addEventListener('submit',async e=>{e.preventDefault();
+  const bad=['name','uname','lang'].filter(k=>{const m=check[k]();setErr(k,m);return m});
+  if(bad.length){toast('warn','Almost there','Complete the highlighted fields to continue.');F[bad[0]].focus();shake();return}
+  const name=F.name.value.trim(),un=F.uname.value;busy(true,'Saving...');
+  try{
+    await runTransaction(db,async tx=>{
+      const uref=doc(db,'usernames',un),snap=await tx.get(uref);
+      if(snap.exists()&&snap.data().uid!==user.uid)throw{code:'username-taken'};
+      if(!snap.exists())tx.set(uref,{uid:user.uid,createdAt:serverTimestamp()});
+      const data={uid:user.uid,name,username:un,preferredLanguage:{code:sel.code,name:sel.name,native:sel.native},onboarded:true,onboardedAt:serverTimestamp()};
+      if(photo){data.photo=photo;data.photoThumb=thumb||photo}
+      tx.set(doc(db,'users',user.uid),data,{merge:true})});
+    try{await updateProfile(user,{displayName:name})}catch(x){console.warn(x)}
+    /* read it back from the server to be sure it was saved */
+    const back=(await getDocFromServer(doc(db,'users',user.uid))).data()||{};
+    if(!back.onboarded||back.username!==un||!back.preferredLanguage||back.preferredLanguage.code!==sel.code||(photo&&back.photo!==photo))throw{code:'verify-failed'};
+    toast('success','Profile saved','Welcome to Chatora, '+name.split(' ')[0]+'!');busy(true,'Taking you in...');setTimeout(()=>go('app'),1300)}
+  catch(err){busy(false);shake();
+    if(err.code==='username-taken'){ustate='taken';uHint('@'+un+' is already taken.','bad');setErr('uname','That username was just taken. Pick another.');F.uname.focus();toast('error','Username taken','Please choose a different username.')}
+    else if(err.code==='permission-denied')toast('error','Couldn’t save','Firestore rules blocked this write. Check the rules for users and usernames.',7000)
+    else if(err.code==='verify-failed')toast('error','Save not confirmed','We couldn’t confirm your profile was saved. Please try again.')
+    else if(err.code==='unavailable'||err.code==='failed-precondition')toast('error','Connection problem','Check your internet and try again.')
+    else toast('error','Couldn’t save','Something went wrong. Please try again.');console.warn(err)}});
+</script>
+</body>
+</html>
