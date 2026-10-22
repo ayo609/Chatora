@@ -1033,6 +1033,12 @@ function endCallCleanup() {
   hideCallScreen();
 }
 
+// Attach calling functions to global window so HTML buttons can access them
+window.startCall = startCall;
+window.acceptCall = acceptCall;
+window.declineCall = declineCall;
+window.toggleMute = toggleMute;
+
 renderPills();renderChats();renderFriends();renderStatus();setTab('chats');
 </script>
 </body>
