@@ -190,7 +190,6 @@ select option{background:#0d161d}
 .cbtn.acc{background:#10B981}
 .cbtn.alt{background:rgba(255,255,255,.15)}
 .cbtn.alt.muted{background:#ef4444}
-/* Video call layer */
 #remoteVideo{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
 #localVideo{display:none;position:absolute;right:14px;bottom:120px;width:110px;height:150px;border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,.3);box-shadow:0 8px 24px rgba(0,0,0,.6)}
 </style>
@@ -381,7 +380,9 @@ const chatName=c=>c.type==='group'?(c.name||'Group'):P(other(c)).name;
 const chatAv=(c,s=50)=>c.type==='group'?grpAv(s):av(P(other(c)),s);
 const unreadOf=c=>(c.unread&&c.unread[uid])||0;
 const typers=c=>Object.entries(c.typing||{}).filter(([u,t])=>u!==uid&&Date.now()-t<4500&&!S.blocked.includes(u)).map(x=>x[0]);
-$('#sIc').innerHTML=IC.search;$('#fIc').innerHTML=IC.search;$('#back').innerHTML=IC.back;$('#hmore').innerHTML=IC.more;$('#rbx').innerHTML=IC.x;
+
+/* ===== CHUNK 1 END ===== */
+ $('#sIc').innerHTML=IC.search;$('#fIc').innerHTML=IC.search;$('#back').innerHTML=IC.back;$('#hmore').innerHTML=IC.more;$('#rbx').innerHTML=IC.x;
 $('#bEmo').innerHTML=IC.smile;$('#bImg').innerHTML=IC.img;$('#rCancel').innerHTML=IC.trash;$('#rSend').innerHTML=IC.send;$('#rPause').innerHTML=IC.pause;
 $('#nChat').innerHTML=IC.chat;$('#nSt').innerHTML=IC.status;$('#nFr').innerHTML=IC.users;$('#nMe').innerHTML=IC.user;
 const fit=()=>{const v=window.visualViewport;$('#app').style.setProperty('--vh',(v?v.height:innerHeight)+'px');if(v&&v.offsetTop)scrollTo(0,0)};
@@ -493,7 +494,8 @@ function renderHead(){const c=S.cur;if(!c)return;$('#hav').innerHTML=c.type==='a
   const bl=c.type==='dm'&&S.blocked.includes(other(c));$('#comp').classList.toggle('hide',bl);$('#blk').classList.toggle('hide',!bl)}
 $('#hav').onclick=$('#hmeta').onclick=()=>openInfo();
 
-const ticks=m=>{if(m.pending)return'<span class="tk">🕒</span>';const c=S.chats[S.cur.id];if(!c||c.type!=='dm')return'<span class="tk">✓</span>';const o=other(c),t=ms(m.createdAt);
+/* ===== CHUNK 2 END ===== */
+ const ticks=m=>{if(m.pending)return'<span class="tk">🕒</span>';const c=S.chats[S.cur.id];if(!c||c.type!=='dm')return'<span class="tk">✓</span>';const o=other(c),t=ms(m.createdAt);
   return ms(c.read&&c.read[o])>=t?'<span class="tk r">✓✓</span>':ms(c.delivered&&c.delivered[o])>=t?'<span class="tk">✓✓</span>':'<span class="tk">✓</span>'};
 function msgHtml(m){
   if(m.type==='system')return`<div class="day"><span>${esc(m.text)}</span></div>`;
@@ -511,7 +513,10 @@ function msgHtml(m){
   return`<div class="row ${mine?'out':'in'}" data-id="${m.id}">${g&&!mine?`<div class="rav">${av(P(m.senderId),28)}</div>`:''}<div class="bw"><div class="bub${m.type==='image'&&!m.deleted?' pic':''}${m.type==='contact'?' cardb':''}${ai?' aiB':''}">${g&&!mine?`<div class="sn">${esc(P(m.senderId).name)}</div>`:''}${fw}${rq}${body}<div class="meta">${meta}</div></div>${rx}</div></div>`}
 const sig=m=>m.id+'|'+JSON.stringify(m.reactions||0)+(m.deleted?'d':'')+(m.edited?'e'+ms(m.editedAt):'')+(S.tr[m.id]?'t':'')+(m.pending?'p':'')+(m.contact&&S.friends[m.contact.uid]?'f':'')+(S.cur.type==='dm'?(()=>{const c=S.chats[S.cur.id];return c?ms(c.read&&c.read[other(c)])>=ms(m.createdAt)?'r':ms(c.delivered&&c.delivered[other(c)])>=ms(m.createdAt)?'v':'s':'s'})():'')+(P(m.senderId).photoThumb?'a':'');
 const mk=h=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild};
-function paint(){if(!S.cur)return;const box=$('#msgs'),atB=box.scrollHeight-box.scrollTop-box.clientHeight<140,clr=S.cleared[S.cur.id]||0;
+function paint(){if(!S.cur)return;
+  // count incoming bytes for messages not sent by me
+  try{ S.msgs.forEach(m=>{ if(m.senderId!==uid && !m.__counted){ addBytesIn(new Blob([JSON.stringify(m)]).size); m.__counted=true; } }); }catch(_){}
+  const box=$('#msgs'),atB=box.scrollHeight-box.scrollTop-box.clientHeight<140,clr=S.cleared[S.cur.id]||0;
   const list=S.msgs.filter(m=>!(m.hiddenFor||[]).includes(uid)&&!S.blocked.includes(m.senderId)&&!expired(m)&&!(clr&&ms(m.createdAt)<=clr));
   const want=[];let last='';list.forEach(m=>{const d=dayKey(m.createdAt);if(d!==last){want.push({k:'d'+d,h:`<div class="day"><span>${dayLabel(m.createdAt)}</span></div>`,s:d});last=d}want.push({k:m.id,h:msgHtml(m),s:sig(m)})});
   if(S.aiFail)want.push({k:'aifail',h:`<div class="row in" data-retry="1"><div class="bw"><div class="bub aiB">⚠️ ${esc(S.aiFailMsg||'I couldn\'t reach the AI server.')}<br><b style="color:var(--cy);cursor:pointer">Tap to retry</b></div></div></div>`,s:'f'+S.aiFailMsg});
@@ -587,7 +592,10 @@ async function sendTo(c,p,opt={}){
   if(Object.keys(un).length)cd.unread=un;if(opt.disappear!==undefined)cd.disappear=opt.disappear;if(c.type==='group')cd.name=c.name;
   const b=writeBatch(db);b.set(mr,msg);b.set(doc(db,'chats',c.id),cd,{merge:true});await b.commit();return mr.id}
 async function sendMsg(p){const c=S.cur;if(!c||c.type==='ai')return;S.forceBottom=true;const reply=S.reply;S.reply=null;$('#rbar').classList.add('hide');
-  try{await sendTo(c,p,{reply})}catch(e){console.warn(e);if(e.code==='blocked')toast('warn','Contact blocked','Unblock to send messages.');
+  try{
+    await sendTo(c,p,{reply});
+    try{ addBytesOut(new Blob([JSON.stringify(p)]).size); }catch(_){}
+  }catch(e){console.warn(e);if(e.code==='blocked')toast('warn','Contact blocked','Unblock to send messages.');
     else toast('error','Message not sent',e.code==='permission-denied'?'Firestore rules are blocking chats.':'Check your connection.')}}
 
 const EM='😀 😁 😂 🤣 😊 😍 😘 😎 🤔 😅 😭 😡 👍 👎 👏 🙏 🔥 ❤️ 💯 🎉 ✨ 😴 🤝 🙌 😇 🥰 😢 😮 🤗 🙄 💪 👋 ✅ ❌ ⭐ 🎧 📚 🍕 ☕ 🚀 😜 🤩 😬 🥳 😤 🤯 🫶 👀'.split(' ');
@@ -595,7 +603,8 @@ $('#emo').innerHTML=EM.map(e=>`<button type="button">${e}</button>`).join('');
 $('#emo').onclick=e=>{const b=e.target.closest('button');if(b){ta.value+=b.textContent;sizeTa();syncSend()}};
 $('#bEmo').onclick=()=>{$('#emo').classList.toggle('hide');ta.blur()};
 
-function loadImg(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('decode'))};i.src=u})}
+/* ===== CHUNK 3 END ===== */
+ function loadImg(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('decode'))};i.src=u})}
 async function prep(f,{max=900,sq=0,q=.8,limit:lim=300000}={}){if(!f||!f.type.startsWith('image/'))throw new Error('type');const im=await loadImg(f),w=im.naturalWidth,h=im.naturalHeight;let cw,ch,sx=0,sy=0,sw=w,sh=h;
   if(sq){const s=Math.min(w,h);sx=(w-s)/2;sy=(h-s)/2;sw=sh=s;cw=ch=Math.min(sq,s)}else{const k=Math.min(1,max/Math.max(w,h));cw=Math.round(w*k);ch=Math.round(h*k)}
   const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');x.fillStyle='#0b1a20';x.fillRect(0,0,cw,ch);x.imageSmoothingQuality='high';x.drawImage(im,sx,sy,sw,sh,0,0,cw,ch);
@@ -681,7 +690,8 @@ async function summarize(){const t=S.msgs.filter(m=>m.type==='text'&&m.text&&!m.
 async function clearAI(){if(!await confirmBox({title:'Clear AI conversation?',text:'All messages with Chatora AI will be deleted.',ok:'Clear',danger:true,icon:'🧹'}))return;
   try{const s=await getDocs(query(collection(db,'users',uid,'ai'),limit(400)));const b=writeBatch(db);s.forEach(d=>b.delete(d.ref));await b.commit();toast('success','Conversation cleared','',2200)}catch(e){toast('error','Couldn\'t clear','Check your connection.')}}
 
-const prefOn=(f,id)=>S[f].includes(id);
+/* ===== CHUNK 4 END ===== */
+ const prefOn=(f,id)=>S[f].includes(id);
 async function togglePref(f,id){const on=!prefOn(f,id);if(f==='pinned'&&on&&S.pinned.length>=3)return toast('warn','Pin limit reached','You can pin up to 3 chats.');
   try{await setDoc(doc(db,'users',uid),{[f]:on?arrayUnion(id):arrayRemove(id)},{merge:true});toast('success',{pinned:on?'Chat pinned':'Chat unpinned',muted:on?'Notifications muted':'Notifications on',archived:on?'Chat archived':'Chat unarchived'}[f],'',2000)}
   catch(e){toast('error','Couldn\'t update','Check your connection.')}}
@@ -778,7 +788,6 @@ async function openInfo(){const c=S.cur;if(!c)return;if(c.type==='ai'){toast('in
       catch(err){console.error(err);toast('error','Save failed')}});
     wrap.querySelector('#ext-rq')?.addEventListener('click',()=>openGroupRequests(id));
 
-    // Live pending count
     if(isAdmin){
       const cntEl=wrap.querySelector('#ext-rq-count');
       const unsub=onSnapshot(collection(db,'chats',id,'joinRequests'),s=>{if(cntEl)cntEl.textContent=s.size?`${s.size} pending`:'None'},()=>{});
@@ -850,7 +859,7 @@ async function handleJoinParams(){const p=new URLSearchParams(location.search);c
     await setDoc(doc(db,'chats',chatId,'joinRequests',uid),{uid,name:S.my.name||'',requestedAt:serverTimestamp(),status:'pending'});
     toast('success','Request sent',`An admin will review your request to join "${chat.name||'the group'}".`,5200);
   }catch(e){console.error(e);toast('error','Could not join',e.code||e.message||'Try again.')}}
-handleJoinParams();
+handleJoinParams().catch(e=>console.warn('[join]',e));
 
 // ============ STORAGE & NETWORK METER ============
 const BYTES_OUT='chatora_bytes_out',BYTES_IN='chatora_bytes_in';
@@ -859,19 +868,12 @@ function addBytesIn(n){const v=(+localStorage.getItem(BYTES_IN)||0)+n;localStora
 function humanBytes(b){b=+b||0;const u=['B','KB','MB','GB','TB'];let i=0;while(b>=1024&&i<u.length-1){b/=1024;i++}return b.toFixed(i?1:0)+' '+u[i]}
 function refreshUsageUI(){const el=$('#usage-out');if(el)el.textContent=humanBytes(localStorage.getItem(BYTES_OUT));
   const el2=$('#usage-in');if(el2)el2.textContent=humanBytes(localStorage.getItem(BYTES_IN))}
-// Count outgoing text
-function patchSendText(){if(!window.__sendTextOrig){window.__sendTextOrig=sendText;
-  const wrapped=function(t){const text=(t??ta.value??'').toString();if(text.trim())addBytesOut(new Blob([text]).size);return window.__sendTextOrig.apply(this,arguments)};
-  // Replace the inner call to sendMsg by wrapping at the sendMsg level instead — safer
-}}
-// Hook sendMsg to count outgoing
-const _sendMsg=sendMsg;
-window.__sendMsgWrapped=async function(p){const bytes=new Blob([JSON.stringify(p)]).size;addBytesOut(bytes);return _sendMsg(p)};
 
 // ============ SOUND PICKER ============
 async function setTone(kind,value){try{await updateDoc(doc(db,'users',uid),{[`notificationPrefs.${kind}`]:value});toast('success','Sound updated',value);playTone(value)}catch(e){toast('error','Save failed')}}
 
-async function saveFriend(f){try{await setDoc(doc(db,'users',uid,'friends',f),{uid:f,addedAt:serverTimestamp()});toast('success','Friend saved',nm(P(f).name)+' is now in your friends.',2800);return true}catch(e){rulesErr(e,'friends');toast('error','Couldn\'t save friend','Check your connection and Firestore rules.');return false}}
+/* ===== CHUNK 5 END ===== */
+ async function saveFriend(f){try{await setDoc(doc(db,'users',uid,'friends',f),{uid:f,addedAt:serverTimestamp()});toast('success','Friend saved',nm(P(f).name)+' is now in your friends.',2800);return true}catch(e){rulesErr(e,'friends');toast('error','Couldn\'t save friend','Check your connection and Firestore rules.');return false}}
 function renderFriends(){const q=norm($('#fq').value),arr=Object.keys(S.friends).map(P).filter(p=>!q||norm(p.name).includes(q)||norm(p.username).includes(q)).sort((a,b)=>nm(a.name).localeCompare(nm(b.name)));
   $('#fl').innerHTML=`<div class="item" data-add="1"><div class="av" style="width:48px;height:48px;background:rgba(34,211,238,.15);color:var(--cy)">${IC.userp}</div><div class="im"><div class="l1"><b style="color:var(--cy)">Add a friend</b></div><div class="l2"><span>Find someone by username</span></div></div></div>`+
   (arr.length?`<div class="sec">${arr.length} friend${arr.length>1?'s':''}</div>`+arr.map(p=>`<div class="item" data-f="${p.uid}">${av(p,48)}<div class="im"><div class="l1"><b>${esc(p.name)}</b></div><div class="l2"><span>@${esc(p.username||'')} · ${presence(p)}</span></div></div></div>`).join(''):empt('🫂','No friends yet','Tap "Add a friend" and enter a username to save them.'))}
@@ -958,7 +960,8 @@ function openStory(u,start=0){const arr=(S.sts[u]||[]).filter(alive).sort((a,b)=
     else if(e.target.closest('#sv')){paused=true;const vs=arr[i].viewers||[];await Promise.all(vs.map(x=>loadProf(x)));const m=modal(`<div class="grab"></div><h3 class="sh">Viewed by ${vs.length}</h3>${vs.length?vs.map(x=>`<div class="lrow" style="border:0;padding:8px 4px">${av(P(x),40)}<span>${esc(P(x).name)}</span></div>`).join(''):'<p class="sub">No views yet.</p>'}`,true);m.el.addEventListener('click',()=>{setTimeout(()=>{paused=false},300)})}};
   show()}
 
-// ============ PROFILE (with privacy extension + sound picker + storage meter) ============
+/* ===== CHUNK 6 END ===== */
+ // ============ PROFILE (with privacy extension + sound picker + storage meter) ============
 function renderMe(){const m=S.my,pl=(m.preferredLanguage&&m.preferredLanguage.code)||'en',bl=S.blocked.length,prv=m.privacy||{lastSeen:'everyone',profilePhoto:'everyone',readReceipts:true},prefs=m.notificationPrefs||{};
   $('#me').innerHTML=`<div style="padding:24px 20px 0;text-align:center">
     <div class="me-av"><div id="meav">${av({...m,photoThumb:m.photo||m.photoThumb,name:m.name||me.email},110)}</div><button class="cam" id="mePhoto">${IC.cam}</button></div>
@@ -1014,7 +1017,6 @@ function renderMe(){const m=S.my,pl=(m.preferredLanguage&&m.preferredLanguage.co
     const mm=modal(`<div class="grab"></div><h3 class="sh">Blocked contacts</h3>${S.blocked.map(u=>`<div class="lrow" style="border:0;padding:8px 4px">${av(P(u),40)}<span>${esc(P(u).name)}</span><button class="b2" data-u="${u}" style="padding:6px 14px">Unblock</button></div>`).join('')}`,true);
     mm.box.addEventListener('click',e=>{const b=e.target.closest('[data-u]');if(b){mm.close();toggleBlock(b.dataset.u)}})};
   $('#mlo').onclick=async()=>{if(await confirmBox({title:'Log out?',text:'You\'ll need to sign in again.',ok:'Log out',icon:'👋'})){await ping(false);toast('info','Logging out…','',1500);logout()}}
-  // Load autodownload pref
   (async()=>{try{const s=await getDoc(doc(db,'users',uid));const v=s.data()?.storagePrefs?.autoDownload;if(v)$('#autodl').value=v}catch{}})()}
 
 const FABS={chats:[IC.edit,'New chat',newChat],status:[IC.cam,'Add status',composeStatus],friends:[IC.userp,'Add a friend',addFriend]};
@@ -1128,10 +1130,6 @@ window.startCall=startCall;window.startVideoCall=startVideoCall;window.acceptCal
 
 // ============ INIT ============
 renderPills();renderChats();renderFriends();renderStatus();setTab('chats');
-</script>
-</body>
-</html>
-
 </script>
 </body>
 </html>
