@@ -827,7 +827,6 @@ async function openInfo(){const c=S.cur;if(!c)return;if(c.type==='ai'){toast('in
 /* ---------- friends ---------- */
 async function saveFriend(u){try{await setDoc(doc(db,'users',uid,'friends',u),{uid:u,addedAt:serverTimestamp()});toast('success','Friend saved',nm(P(u).name),2500);return true}catch(e){toast('error','Couldn’t save','Check your connection.');return false}}
 async function backfillSavedBy(){
-  // ensure "savedBy" mirrors so privacy filters work: if someone saved me and I saved them, keep in sync.
   try{
     const friends=Object.keys(S.friends||{});
     for(const f of friends){
@@ -1232,7 +1231,6 @@ async function handleJoinParams(){
 }
 handleJoinParams().catch(e=>console.warn('[join]',e));
 
-/* placeholder join-by-code (invite token not group-code; kept as no-op to avoid ref errors) */
 function joinByCode(){toast('info','Group invite','Use the invite link instead.')}
 
 /* ---------- profile ---------- */
@@ -1332,8 +1330,19 @@ function renderMe(){
   };
   $('#set-push').onchange=async e=>{
     setSetting('push',e.target.checked?'1':'0');
-    if(e.target.checked){await registerFCM();toast('success','Push enabled','If you granted permission.')}
-    else toast('info','Push disabled','',2000);
+    if(e.target.checked){
+      await registerFCM();
+      toast('success','Push enabled','If you granted permission.');
+    }else{
+      try{
+        if(FCM){ try{ await deleteToken(FCM) }catch(_){} }
+        const snap = await getDocs(collection(db,'users',uid,'devices'));
+        const b = writeBatch(db);
+        snap.forEach(d => b.delete(d.ref));
+        await b.commit();
+      }catch(err){console.warn('[FCM cleanup]',err)}
+      toast('info','Push disabled','',2000);
+    }
   };
   $('#set-prev').onchange=e=>{setSetting('prev',e.target.checked?'1':'0');toast('success','Saved')};
   $('#set-autodl').onchange=e=>{setSetting('autodl',e.target.value);toast('success','Saved')};
@@ -1480,7 +1489,6 @@ function endCallCleanup(){
 }
 window.startCall=startCall;window.acceptCall=acceptCall;window.declineCall=declineCall;window.toggleMute=toggleMute;
 
-/* header call buttons */
 $('#cVoice').onclick=()=>startCall(false);
 $('#cVideo').onclick=()=>startCall(true);
 
