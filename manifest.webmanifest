@@ -1,0 +1,15 @@
+{
+  "name": "Chatora",
+  "short_name": "Chatora",
+  "description": "Chat with AI summaries, translation, voice notes and calls",
+  "start_url": "chat.html",
+  "scope": ".",
+  "id": "/chat.html",
+  "display": "standalone",
+  "background_color": "#04080c",
+  "theme_color": "#04080c",
+  "icons": [
+    { "src": "chatora-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "chatora-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
