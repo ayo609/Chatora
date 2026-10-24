@@ -1492,6 +1492,20 @@ window.startCall=startCall;window.acceptCall=acceptCall;window.declineCall=decli
 $('#cVoice').onclick=()=>startCall(false);
 $('#cVideo').onclick=()=>startCall(true);
 
+ /* Handle notification-click messages from the service worker — safe to add even if it already exists */
+if('serviceWorker' in navigator && !window.__swMessageBound){
+  window.__swMessageBound = true;
+  navigator.serviceWorker.addEventListener('message', e=>{
+    if(e.data && e.data.type==='open'){
+      const chatId = e.data.chatId;
+      const open = ()=>{
+        if(chatId && S.chats && S.chats[chatId]) openChat(S.chats[chatId]);
+      };
+      open();
+      setTimeout(open, 1500);
+    }
+  });
+}
 /* ---------- init ---------- */
 renderPills();
 renderChats();
