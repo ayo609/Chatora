@@ -390,11 +390,18 @@ async function registerFCM(){
 async function pushNotify(payload){
   try{
     if(setting('push','0')!=='1')return;
-    const r=await fetch(AI_URL+'/api/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,uid,from:S.my.name||''})});
+    let tok=null;
+    try{ tok=await auth.currentUser?.getIdToken() }catch(e){}
+    if(!tok)return;
+    const body=JSON.stringify(payload||{});
+    const r=await fetch(AI_URL+'/api/notify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+      body
+    });
     if(!r.ok)console.warn('[push]',r.status);
   }catch(e){console.warn('[push]',e)}
 }
-
 /* ================= network + media ================= */
 const NET={out:{msgs:0,media:0,ai:0},in:{msgs:0,media:0,ai:0}};
 function addNet(dir,kind,n){NET[dir][kind]+=n||0;try{localStorage.setItem('chat_net',JSON.stringify(NET))}catch(e){}}
@@ -1437,6 +1444,7 @@ async function startCall(video=false){
   if(video){lvid.style.display='block';lvid.srcObject=localStream}
   try{playSeq(TONES.ring,.1)}catch(e){}
   const call=peer.call(otherUid,localStream,video?{metadata:{video:true}}:{});
+ try{ pushNotify({kind:'call',chatId:c.id,callId:call.id||('call_'+Date.now()),callType:video?'video':'voice'}) }catch(_){}
   currentCall=call;window.__incomingIsVideo=!!video;
   call.on('stream',remote=>{
     if(video){rvid.srcObject=remote;rvid.style.display='block';callScreen.classList.add('live')}
